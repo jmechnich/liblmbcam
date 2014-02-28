@@ -1,0 +1,114 @@
+/**************************************************************************
+**       Title: 
+**    $RCSfile: QlmbCamModeControl.icc,v $
+**   $Revision: 1.4 $$Name:  $
+**       $Date: 2004/12/03 09:16:00 $
+**   Copyright: GPL $Author: ronneber $
+** Description:
+**
+**    
+**
+**-------------------------------------------------------------------------
+**
+**  $Log: QlmbCamModeControl.icc,v $
+**  Revision 1.4  2004/12/03 09:16:00  ronneber
+**  - changeFramerate() slot now updates Framerate combo
+**
+**  Revision 1.3  2003/09/19 14:39:42  mechnich
+**  - changed handling of Format7 image geometry controls
+**
+**  Revision 1.2  2003/08/05 15:35:54  mechnich
+**  added lineedits for Format7 image position and changed layout
+**
+**  Revision 1.1  2003/05/22 08:25:56  mechnich
+**  initial revision
+**
+**
+**
+**************************************************************************/
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+QlmbCamModeControlWidget::changeVideoMode( const QString& mode)
+{
+  emit( videoModeChanged( mode));
+  if( mode.startsWith( "Format7"))
+  {
+    updateFormat7Controls();
+  }
+  else
+  {
+    updateFramerateCombo();
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+QlmbCamModeControlWidget::changeFramerate( const QString& fps)
+{
+  emit( framerateChanged( fps.toDouble()));
+  if( p_camera->mode().substr(0,7) == "Format7")
+  {
+    updateFormat7Controls();
+  }
+  else
+  {
+    updateFramerateCombo();
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+QlmbCamModeControlWidget::updateFormat7Geometry()
+{
+  unsigned int width = p_camera->width();
+  unsigned int height = p_camera->height();
+  
+  try
+  {
+    p_camera->stopCamera();
+    p_camera->setLeft( p_left->text().toInt());
+    p_camera->setTop( p_top->text().toInt());
+    p_camera->setWidth( p_width->text().toInt());
+    p_camera->setHeight( p_height->text().toInt());
+    
+    if( width != p_camera->width())
+        emit( widthChanged( p_camera->width()));
+    if( height != p_camera->height())
+        emit( heightChanged( p_camera->height()));
+        
+    p_camera->startCameraRunContinuous();
+  }
+  catch( LMBCamError& error)
+  {
+    QString error( "Format7 geometry error: ");
+    if( p_left->text().toInt() + p_width->text().toInt() >
+        p_maxWidth->text().toInt())
+    {
+      error.append( "left + width exceeds maximum image width.");
+    }
+    else if( p_top->text().toInt() + p_height->text().toInt() >
+             p_maxHeight->text().toInt())
+    {
+      error.append( "top + height exceeds maximum image height.");
+    }
+    else
+    {
+      error.append( "cannot restart camera with given image geometry.");
+    }
+    
+    QMessageBox::warning( 0, "Warning", error, 0, 0);
+  }
+}

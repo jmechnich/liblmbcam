@@ -1,0 +1,5 @@
+usr/include/libqlmbcam/*
+usr/lib/libqlmbcam.a
+usr/lib/libqlmbcam.so
+usr/lib/libqlmbcam.la
+usr/bin/libqlmbcam-config

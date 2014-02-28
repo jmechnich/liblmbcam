@@ -1,0 +1,46 @@
+/**************************************************************************
+**       Title: 
+**    $RCSfile: QlmbCamParamControl.icc,v $
+**   $Revision: 1.1 $$Name:  $
+**       $Date: 2003/05/22 08:53:18 $
+**   Copyright: GPL $Author: mechnich $
+** Description:
+**
+**    
+**
+**-------------------------------------------------------------------------
+**
+**  $Log: QlmbCamParamControl.icc,v $
+**  Revision 1.1  2003/05/22 08:53:18  mechnich
+**  initial revision
+**
+**
+**
+**************************************************************************/
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+QlmbCamParamControlWidget::changeParamValue( int value)
+{
+  QString parameter = sender()->name();
+  
+  p_camera->param( parameter.latin1())->setValue( value);
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+QlmbCamParamControlWidget::changeAutoMode( bool autoMode)
+{
+  QString parameter = sender()->name();
+
+  p_camera->param( parameter.latin1())->setValue( autoMode ? 1 : 0);
+}
+

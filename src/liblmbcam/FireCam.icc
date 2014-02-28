@@ -1,0 +1,826 @@
+/**************************************************************************
+**       Title: 
+**    $RCSfile: FireCam.icc,v $
+**   $Revision: 1.32 $$Name:  $
+**       $Date: 2006/07/13 12:54:17 $
+**   Copyright: GPL $Author: jhense $
+** Description:
+**
+**    
+**
+**-------------------------------------------------------------------------
+**
+**  $Log: FireCam.icc,v $
+**  Revision 1.32  2006/07/13 12:54:17  jhense
+**  Added new interface getFrameStartMutex(). Other threads can be notified, when
+**  frame transmission started. Raw-Mode support in SMP-kernels implemented. Internal
+**  buffer-size is reduced a little bit to the size of frame (not the transmitted
+**  packages).
+**
+**  Revision 1.31  2006/06/28 08:07:17  jhense
+**  Defined NUM_DMA_BUFFERS as constant.
+**
+**  Revision 1.30  2006/06/16 15:17:00  jhense
+**  Throwing error when waiting for a frame and frame couldn't be received.
+**
+**  Revision 1.29  2006/06/04 12:26:50  jhense
+**  Throwing FireCamLostDMAPacketError when dma_single_capture fails.
+**
+**  Revision 1.28  2006/03/09 14:55:32  jhense
+**  New function measureRelativeStarttimes to get the timing of a
+**  sequence.
+**
+**  Revision 1.27  2006/01/11 16:07:43  jhense
+**  Added feature to allocate a ringbuffer in application and set it as camera-ringbuffer: setExternalRingbuffer
+**  Start and end of transmission can be read with getFrameStarttime and getFrameFilltime
+**
+**  Revision 1.26  2004/05/28 12:10:13  mechnich
+**  moved parameter handling to LMBCam class
+**
+**  Revision 1.25  2004/02/22 00:18:27  mechnich
+**  replaced mutex locks/unlocks by MutexLocker objects
+**
+**  Revision 1.24  2004/02/20 23:40:25  mechnich
+**  replaced ordinary mutex locks and unlocks by creation of a MutexLocker object
+**
+**  Revision 1.23  2003/12/18 15:34:33  mechnich
+**  changed return value of bytePerPixel from float to double
+**
+**  Revision 1.22  2003/12/02 16:34:19  mechnich
+**  fixed segfault while capturing with multiple cameras
+**
+**  Revision 1.21  2003/10/05 19:34:53  mechnich
+**  improved error messages
+**
+**  Revision 1.20  2003/10/01 14:17:01  mechnich
+**  corrected bug in Format7 geometry handling
+**
+**  Revision 1.19  2003/09/19 14:39:03  mechnich
+**  - corrected error in mode initialization
+**  - changed handling of Format7 image geometry controls
+**
+**  Revision 1.18  2003/08/05 14:39:50  mechnich
+**  corrected errors in Format7 functionalities
+**
+**  Revision 1.17  2003/07/03 15:25:17  mechnich
+**  - added comments
+**  - improved Format7 capabilities
+**  - added boolean return values to set...() functions
+**
+**  Revision 1.16  2003/06/12 16:13:19  mechnich
+**  added comments
+**
+**  Revision 1.15  2003/05/22 08:29:46  mechnich
+**  - minor bugfixes
+**  - introduced parameterMap()
+**
+**  Revision 1.14  2003/05/21 14:59:09  mechnich
+**  - introduced setColorCoding() function
+**  - completed reading of already set camera features at startup
+**  - completed framerate setting and reading
+**
+**  Revision 1.13  2003/05/21 09:00:47  mechnich
+**  removed superfluent functions and added missing to LMBCam
+**
+**  Revision 1.12  2003/05/16 12:12:17  ronneber
+**  - fixed error, when asking for Frame 0 and empty framebuffer
+**
+**  Revision 1.11  2003/05/12 15:42:29  mechnich
+**  - camera settings are now loaded at startup
+**  - framedropping set as default
+**  - improved format7 compatibility
+**  - added functions nComponents(), bytePerPixel() and isCompressed() to the interface
+**
+**  Revision 1.10  2003/05/09 14:20:21  ronneber
+**  - setMode() now stops the Camera
+**  - getFrame() checks if requested frame is in ringbuffer
+**
+**  Revision 1.9  2003/05/06 23:05:39  mechnich
+**  - increased thread safety of library
+**  - restructured parameter classes, introduced new subclasses to LMBCamParam:
+**    LMBCamParamIntRange and LMBCamParamSwitch
+**    TODO: add LMBCamParamDoubleRange for absolute features
+**
+**  Revision 1.8  2003/05/05 02:36:37  mechnich
+**  temporarily removed locking and unlocking of the frame mutexes in the
+**  handler thread to prevent applications from deadlocking
+**
+**  Revision 1.7  2003/04/24 17:02:26  mechnich
+**  - added return value to setMode() and setFramerate()
+**  - added full functionality to recently added functions
+**
+**  Revision 1.6  2003/04/23 13:28:52  mechnich
+**  - fixed parameter queries for all tested cameras
+**  - fixed bug in iso handler function
+**  - moved p_cameraIsRunning with affiliated functions to LMBCam
+**
+**  Revision 1.5  2003/04/17 01:15:03  mechnich
+**  - removed frame mutexes
+**  - fixed bug in stopCamera()
+**
+**  Revision 1.4  2003/04/16 16:41:26  mechnich
+**  added threaded framegrabber for non-DMA mode
+**
+**  Revision 1.3  2003/01/20 10:22:24  mechnich
+**  *** empty log message ***
+**
+**  Revision 1.2  2002/12/11 04:21:21  mechnich
+**  made non-dma mode the default
+**  adapted parameter handling for dma accordingly
+**
+**  Revision 1.1  2002/12/04 13:17:46  mechnich
+**  initial revision
+**
+**
+**
+**************************************************************************/
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::vendor() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::string
+liblmbcam::FireCam::vendor() const
+{
+  return p_info.vendor;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::model() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::string
+liblmbcam::FireCam::model() const
+{
+  return p_info.model;
+}
+      
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::guid() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::string
+liblmbcam::FireCam::guid() const
+{
+  std::stringstream ret;
+  ret << p_info.euid_64;
+  return ret.str();
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::reset()
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::FireCam::reset()
+{
+  dc1394_init_camera( p_handle, p_node);
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::left() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FireCam::left() const
+{
+  if( p_currentMode.p_formatID == FORMAT_SCALABLE_IMAGE_SIZE)
+  {
+    return p_format7Left;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::setLeft( unsigned int left)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FireCam::setLeft( unsigned int left)
+{
+  bool ret = false;
+  if( p_currentMode.p_formatID == FORMAT_SCALABLE_IMAGE_SIZE)
+  {
+    stopCamera();
+    if( left < 0 || p_format7MaxWidth < left)
+    {
+      FireCamError error( "Error setting format7 left position");
+      LMBErrorHandler::ErrorHandler()->handle( error);
+      return false;
+    }
+    else
+    {
+      p_format7Left = left;
+      ret = true;
+    }
+  }
+  return ret;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::top() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FireCam::top() const
+{
+  if( p_currentMode.p_formatID == FORMAT_SCALABLE_IMAGE_SIZE)
+  {
+    return p_format7Top;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::setTop( unsigned int top)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FireCam::setTop( unsigned int top)
+{
+  bool ret = false;
+  if( p_currentMode.p_formatID == FORMAT_SCALABLE_IMAGE_SIZE)
+  {
+    stopCamera();
+    if( top < 0 || p_format7MaxHeight < top)
+    {
+      FireCamError error( "Error setting format7 top position");
+      LMBErrorHandler::ErrorHandler()->handle( error);
+      return false;
+    }
+    else
+    {
+      p_format7Top = top;
+      ret = true;
+    }
+  }
+  return ret;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::width() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FireCam::width() const
+{
+  if( p_currentMode.p_formatID == FORMAT_SCALABLE_IMAGE_SIZE)
+  {
+    return p_format7Width;
+  }
+  else
+  {
+    return p_currentMode.p_width;
+  }
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::setWidth( unsigned int width)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FireCam::setWidth( unsigned int width)
+{
+  bool ret = false;
+  if( p_currentMode.p_formatID == FORMAT_SCALABLE_IMAGE_SIZE)
+  {
+    stopCamera();
+    if( width > (p_format7MaxWidth - p_format7Left))
+    {
+      std::stringstream errString;
+      errString << "Error setting format7 width: " << width
+                << " is greater than p_format7MaxWidth - p_format7Left ("
+                << ( p_format7MaxWidth - p_format7Left) << ")";
+      FireCamError error( errString.str());
+      LMBErrorHandler::ErrorHandler()->handle( error);
+      return false;
+    }
+    else
+    {
+      p_format7Width = width;
+      ret = true;
+    }
+  }
+  return ret;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::maxWidth() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FireCam::maxWidth() const
+{
+  if( p_currentMode.p_formatID == FORMAT_SCALABLE_IMAGE_SIZE)
+  {
+    return p_format7MaxWidth;
+  }
+  else
+  {
+    return p_currentMode.p_width;
+  }
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::height() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FireCam::height() const
+{
+  if( p_currentMode.p_formatID == FORMAT_SCALABLE_IMAGE_SIZE)
+  {
+    return p_format7Height;
+  }
+  else
+  {
+    return p_currentMode.p_height;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::setHeight( unsigned int height)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FireCam::setHeight( unsigned int height)
+{
+  bool ret = false;
+  if( p_currentMode.p_formatID == FORMAT_SCALABLE_IMAGE_SIZE)
+  {
+    stopCamera();
+    if( height > ( p_format7MaxHeight - p_format7Top))
+    {
+      std::stringstream errString;
+      errString << "Error setting format7 height: " << height
+                << " is greater than p_format7MaxHeight - p_format7Top ("
+                << ( p_format7MaxHeight - p_format7Top) << ")";
+      FireCamError error( errString.str());
+      LMBErrorHandler::ErrorHandler()->handle( error);
+      return false;
+    }
+    else
+    {
+      p_format7Height = height;
+      ret = true;
+    }
+  }
+  return ret;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::maxHeight() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FireCam::maxHeight() const
+{
+  if( p_currentMode.p_formatID == FORMAT_SCALABLE_IMAGE_SIZE)
+  {
+    return p_format7MaxHeight;
+  }
+  else
+  {
+    return p_currentMode.p_height;
+  }
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::availableModes() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::vector<std::string>
+liblmbcam::FireCam::availableModes() const
+{
+  std::vector<std::string> ret;
+  
+  for( std::map<std::string,quadlet_t>::const_iterator it =
+           p_availableModes.begin(); it != p_availableModes.end(); ++it)
+  {
+    ret.push_back( it->first);
+  }
+  
+  return ret;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::vector<double>
+liblmbcam::FireCam::availableFramerates() const
+{
+  return availableFrameratesInMode( mode());
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::rawImage()
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned char*
+liblmbcam::FireCam::rawImage()
+{
+  return (unsigned char*) p_camera.capture_buffer;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::doneWithBuffer()
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::FireCam::doneWithBuffer()
+{
+  if( p_deviceName != "" && p_availableParameters["DMA"]->asInt() == 1)
+  {
+    dc1394_dma_done_with_buffer( &p_camera);
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::handle() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+raw1394handle_t
+liblmbcam::FireCam::handle()
+{
+  return p_handle;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::node() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+nodeid_t
+liblmbcam::FireCam::node()
+{
+  return p_node;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::setMode( const Mode& mode)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::FireCam::setMode( const Mode& mode)
+{
+  p_currentMode = mode;
+  if( p_currentMode.p_formatID == FORMAT_SCALABLE_IMAGE_SIZE)
+  {
+    if( dc1394_query_format7_max_image_size( p_handle, p_node,
+                                             p_currentMode.p_id,
+                                             &p_format7MaxWidth,
+                                             &p_format7MaxHeight)
+        != DC1394_SUCCESS)
+    {
+      FireCamCriticalError error(
+          "error while querying max image size");
+      LMBErrorHandler::ErrorHandler()->handle( error);
+      return;
+    }
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::setFramerate( const Framerate& framerate)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::FireCam::setFramerate( const Framerate& framerate)
+{
+  p_currentFramerate = framerate;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::string
+liblmbcam::FireCam::colorCoding() const
+{
+  for( std::map<std::string,int>::const_iterator it = p_colorCodings.begin();
+       it != p_colorCodings.end(); ++it)
+  {
+    if( p_currentMode.p_colorCodingID  == it->second)
+    {
+      return it->first;
+    }
+  }
+  
+  return "";
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::cleanup()
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::FireCam::cleanup()
+{
+  MutexLocker locker( p_libRawMutex);
+  if( p_deviceName != "" && p_availableParameters["DMA"]->asInt() == 1)
+  {
+    dc1394_dma_unlisten( p_handle, &p_camera);
+    dc1394_dma_release_camera( p_handle, &p_camera);
+  }
+  else
+  {
+    dc1394_release_camera( p_handle, &p_camera);
+  }
+  
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::capture()
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::FireCam::capture()
+{
+  /*---------------------------------------------------------------------
+   *  Capture a frame
+   *--------------------------------------------------------------------*/
+  if( p_deviceName != "" && p_availableParameters["DMA"]->asInt() == 1)
+  {
+   if( dc1394_dma_single_capture( &p_camera) != DC1394_SUCCESS)
+    {
+      stopCamera();
+      FireCamError error( "unable to capture a frame in dma mode");
+      LMBErrorHandler::ErrorHandler()->handle( error);
+    }
+  }
+  else
+  {
+    if( dc1394_single_capture( p_handle, &p_camera) != DC1394_SUCCESS)
+    {
+      stopCamera();
+      FireCamError error( "unable to capture a frame");
+      LMBErrorHandler::ErrorHandler()->handle( error);
+    }
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:setRingBufferSize( unsigned int nFrames)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::FireCam::setRingBufferSize( unsigned int nFrames)
+{
+  if( !p_cameraIsRunning)
+  {
+    p_numBufferedFrames = nFrames;
+  }
+  else
+  {
+    FireCamError error( "unable to set ringbuffer size: camera is running");
+    LMBErrorHandler::ErrorHandler()->handle( error);
+  }
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::mostRecentFrameIndex()
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+long
+liblmbcam::FireCam::mostRecentFrameIndex()
+{
+  if( p_cameraIsRunning)
+  {
+    return p_writtenFrameCount - (long) 1;
+  }
+  else
+  {
+    return -1;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::mostRecentFrameIndex()
+ *  ==> see headerfile
+ *=======================================================================*/
+inline int liblmbcam::FireCam::mostRecentRingBufferIndex()
+{ 
+  return mostRecentFrameIndex() % p_numBufferedFrames;
+}
+
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::waitForFrameStarted( long frameIndex)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+long
+liblmbcam::FireCam::waitForFrameStarted( long frameIndex)
+{
+  if( frameIndex < 0)
+  {
+    return -1;
+  }
+  else
+  {
+    MutexLocker locker( &p_frameStartMutex);
+    while( p_writtenFrameCount < frameIndex)
+    {
+      pthread_cond_wait( &p_frameStartCond,
+                         &p_frameStartMutex);
+      p_readFrameCount = p_writtenFrameCount - (long) 1;
+    }
+    return frameIndex;
+  }
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::waitForFrameFinished( long frameIndex)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+long
+liblmbcam::FireCam::waitForFrameFinished( long frameIndex)
+{
+	
+  if( frameIndex < 0)
+  {
+    return -1;
+  }
+  else
+  {
+    MutexLocker locker( &p_frameFinishMutex);
+    while( p_writtenFrameCount - (long) 1 < frameIndex)
+    {
+      pthread_cond_wait( &p_frameFinishCond,
+                         &p_frameFinishMutex);
+      p_readFrameCount = p_writtenFrameCount;
+      if (_packetLostInDMA)
+      {
+        _packetLostInDMA = 0;
+        throw FireCamLostDMAPacketError();
+      }      
+    }
+
+    return frameIndex;
+  }
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::tryLockFrame( long frameIndex)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FireCam::tryLockFrame( long frameIndex)
+{
+  bool ret = false;
+  
+  if( frameIndex >= 0)
+  {
+    if( p_lockedFrame < 0)
+    {
+      if( frameIndex < p_writtenFrameCount)
+      {
+        if( p_writtenFrameCount - (long) p_numBufferedFrames < frameIndex)
+        {
+          p_lockedFrame = frameIndex;
+          ret = true;
+        }
+        else
+        {
+          std::stringstream errString;
+          errString << "Frame " << frameIndex << " is no longer available";
+          FireCamError error( errString.str());
+          LMBErrorHandler::ErrorHandler()->handle( error);
+        }
+      }
+      else
+      {
+        std::stringstream errString;
+        errString << "Frame " << frameIndex << " is not yet available";
+        FireCamError error( errString.str());
+        LMBErrorHandler::ErrorHandler()->handle( error);
+      }
+    }
+    else
+    {
+      std::stringstream errString;
+      errString << "Frame " << p_lockedFrame << " is already locked";
+      FireCamError error( errString.str());
+      LMBErrorHandler::ErrorHandler()->handle( error);
+    }
+  }
+  return ret;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::getFrame( long frameIndex)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned char*
+liblmbcam::FireCam::getFrame( long frameIndex)
+{
+  if( p_writtenFrameCount == 0
+      || frameIndex < 0
+      || frameIndex < p_writtenFrameCount - (long) p_numBufferedFrames
+      || frameIndex > p_writtenFrameCount)
+  {
+    return 0;
+  }
+  else
+  {
+    return _vBufFrameStart[frameIndex%p_numBufferedFrames];
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::unlockFrame()
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::FireCam::unlockFrame()
+{
+  if( p_lockedFrame < 0)
+  {
+    std::stringstream errString;
+    errString << "No frame locked";
+    FireCamError error( errString.str());
+    LMBErrorHandler::ErrorHandler()->handle( error);
+  }
+  else
+  {
+    p_readFrameCount = p_lockedFrame;
+    p_lockedFrame = -1;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::isCompressed() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FireCam::isCompressed() const
+{
+  if( nComponents() != 0)
+  {
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::nComponents() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FireCam::nComponents() const
+{
+  return p_currentMode.p_nComponents;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FireCam::bytePerPixel() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+double
+liblmbcam::FireCam::bytePerPixel() const
+{
+  return p_currentMode.p_bytePerPixel;
+}

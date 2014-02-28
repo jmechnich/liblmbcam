@@ -1,0 +1,5 @@
+The liblmbcam CVS server can be accessed (read-only) with:
+
+ cvs -d :pserver:anonymous@falballa.informatik.uni-freiburg.de:/lmbsoft login
+ cvs -d :pserver:anonymous@falballa.informatik.uni-freiburg.de:/lmbsoft \
+	co liblmbcam

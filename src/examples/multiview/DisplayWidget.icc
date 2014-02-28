@@ -1,0 +1,85 @@
+/**************************************************************************
+**       Title: 
+**    $RCSfile: DisplayWidget.icc,v $
+**   $Revision: 1.1 $$Name:  $
+**       $Date: 2003/10/01 13:41:15 $
+**   Copyright: GPL $Author: pigorsch $
+** Description:
+**
+**    
+**
+**-------------------------------------------------------------------------
+**
+**  $Log: DisplayWidget.icc,v $
+**  Revision 1.1  2003/10/01 13:41:15  pigorsch
+**  - initial revision
+**
+**
+**
+**
+**************************************************************************/
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+DisplayWidget::setFrameDrop( bool dropFrames)
+{
+  p_dropFrames = dropFrames;
+}
+
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+long
+DisplayWidget::nextFrame()
+{
+  if( p_dropFrames)
+  {
+    return p_camera->mostRecentFrameIndex();
+  }
+  else
+  {
+    return p_camera->waitForFrameFinished( ++p_currentFrame);
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned char*
+DisplayWidget::currentRawImage()
+{
+  unsigned char* ret = 0;
+  
+  if( p_data)
+  {
+    unsigned int size = p_camera->width()*p_camera->height();
+    ret = new unsigned char[size];
+    memcpy( ret, p_data, size);
+  }
+  
+  return ret;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+DisplayWidget::copyRawImage( unsigned char* dest)
+{
+  if( p_data)
+  {
+    memcpy( dest, p_data, p_camera->width()*p_camera->height());
+  }
+}
+

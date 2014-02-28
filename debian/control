@@ -1,0 +1,43 @@
+Source: liblmbcam
+Priority: optional
+Maintainer: Joerg Mechnich <mechnich@informatik.uni-freiburg.de>
+Build-Depends: debhelper (>= 4.0.0), autotools-dev, libraw1394-dev, libdc1394-dev, libqt3-mt-dev, libcmdline-dev, libfidwid-dev, libtiff4-dev
+Standards-Version: 3.6.2
+Section: libs
+
+Package: liblmbcam-dev
+Section: libdevel
+Architecture: any
+Depends: liblmbcam1 (= ${Source-Version})
+Description: C++ library interface to IEEE1394 digital cameras
+ This library provides a C++ frontend to the libdc1394 library.
+
+Package: liblmbcam1
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: C++ library interface to IEEE1394 digital cameras - development files
+ This library provides a C++ frontend to the libdc1394 library.
+
+Package: libqlmbcam-dev
+Section: libdevel
+Architecture: any
+Depends: libqlmbcam1 (= ${Source-Version})
+Description: C++ widget library based on Qt3 for controlling IEEE1304 digital cameras
+ This library uses libfidwid for rendering camera images. 
+
+Package: libqlmbcam1
+Section: libs
+Architecture: any
+Depends: liblmbcam1 (= ${Source-Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: C++ library interface to IEEE1394 digital cameras - development files
+ This library uses libfidwid for rendering camera images. 
+
+Package: qlmbcam
+Section: libs
+Architecture: any
+Depends: libqlmbcam1 (= ${Source-Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Qt-based application for controlling IEEE1394 digital cameras
+ This program provides full control of Firewire cameras.
+ Changing of parameters is implemented as well as live image display and
+ grabbing.

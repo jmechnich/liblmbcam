@@ -1,0 +1,5 @@
+usr/include/liblmbcam/*
+usr/lib/liblmbcam.a
+usr/lib/liblmbcam.so
+usr/lib/liblmbcam.la
+usr/bin/liblmbcam-config

@@ -1,0 +1,543 @@
+/**************************************************************************
+**       Title: 
+**    $RCSfile: FileCam.icc,v $
+**   $Revision: 1.3 $$Name:  $
+**       $Date: 2004/02/22 00:18:27 $
+**   Copyright: GPL $Author: mechnich $
+** Description:
+**
+**    
+**
+**-------------------------------------------------------------------------
+**
+**  $Log: FileCam.icc,v $
+**  Revision 1.3  2004/02/22 00:18:27  mechnich
+**  replaced mutex locks/unlocks by MutexLocker objects
+**
+**  Revision 1.2  2003/12/18 15:34:33  mechnich
+**  changed return value of bytePerPixel from float to double
+**
+**  Revision 1.1  2003/11/05 16:31:39  mechnich
+**  initial revision
+**
+**
+**
+**************************************************************************/
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::string
+liblmbcam::FileCam::vendor() const
+{
+  return "LMB";
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::string
+liblmbcam::FileCam::model() const
+{
+  return "FileCam";
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::string
+liblmbcam::FileCam::guid() const
+{
+  return p_filename;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::FileCam::reset()
+{}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+liblmbcam::LMBCamParam*
+liblmbcam::FileCam::param( const std::string& paramStr)
+{
+  return 0;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::vector<std::string>
+liblmbcam::FileCam::availableParameters() const
+{
+  return std::vector<std::string>();
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::map<std::string,liblmbcam::LMBCamParam*>
+liblmbcam::FileCam::parameterMap() const
+{
+  return std::map<std::string,LMBCamParam*>();
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FileCam::setMode( const std::string& mode)
+{
+  return true;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::string
+liblmbcam::FileCam::mode() const
+{
+  std::stringstream ret;
+  ret << p_maxWidth << "x" << p_maxHeight << " " << colorCoding();
+  return ret.str();
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::vector<std::string>
+liblmbcam::FileCam::availableModes() const
+{
+  return std::vector<std::string>();
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FileCam::setFramerate( double framerate, bool allowRounding)
+{
+  if( framerate > 30)
+  {
+    return false;
+  }
+  
+  if( allowRounding)
+  {
+    p_framerate = round(framerate);
+  }
+  else
+  {
+    p_framerate = framerate;
+  }
+  return true;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+double
+liblmbcam::FileCam::framerate() const
+{
+  return p_framerate;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::vector<double>
+liblmbcam::FileCam::availableFramerates() const
+{
+  std::vector<double> ret;
+  ret.push_back( 3.75);
+  ret.push_back( 7.5);
+  ret.push_back( 15);
+  ret.push_back( 30);
+  
+  return ret;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::vector<double>
+liblmbcam::FileCam::availableFrameratesInMode( const std::string& mode) const
+{
+  return availableFramerates();
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FileCam::setColorCoding( const std::string& colorCoding)
+{
+  return true;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::string
+liblmbcam::FileCam::colorCoding() const
+{
+  return p_colorCoding;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FileCam::left() const
+{
+  return p_left;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FileCam::setLeft( unsigned int left)
+{
+  stopCamera();
+  if( left < 0 || p_maxWidth < left)
+  {
+    FileCamError error( "Error setting left position");
+    LMBErrorHandler::ErrorHandler()->handle( error);
+    return false;
+  }
+  else
+  {
+    p_left = left;
+    return true;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FileCam::top() const
+{
+  return p_top;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FileCam::setTop( unsigned int top)
+{
+  stopCamera();
+  if( top < 0 || p_maxHeight < top)
+  {
+    FileCamError error( "Error setting left position");
+    LMBErrorHandler::ErrorHandler()->handle( error);
+    return false;
+  }
+  else
+  {
+    p_top = top;
+    return true;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FileCam::width() const
+{
+  return p_width;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FileCam::setWidth( unsigned int width)
+{
+  stopCamera();
+  if( width > (p_maxWidth - p_left))
+  {
+    std::stringstream errString;
+    errString << "Error setting width: " << width
+              << " is greater than p_maxWidth - p_left ("
+              << ( p_maxWidth - p_left) << ")";
+    FileCamError error( errString.str());
+    LMBErrorHandler::ErrorHandler()->handle( error);
+    return false;
+  }
+  else
+  {
+    p_width = width;
+    return true;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FileCam::maxWidth() const
+{
+  return p_maxWidth;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FileCam::height() const
+{
+  return p_height;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FileCam::setHeight( unsigned int height)
+{
+  stopCamera();
+  if( height > (p_maxHeight - p_top))
+  {
+    std::stringstream errString;
+    errString << "Error setting width: " << height
+              << " is greater than p_maxHeight - p_top ("
+              << ( p_maxHeight - p_top) << ")";
+    FileCamError error( errString.str());
+    LMBErrorHandler::ErrorHandler()->handle( error);
+    return false;
+  }
+  else
+  {
+    p_height = height;
+    return true;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FileCam::maxHeight() const
+{
+  return p_maxHeight;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::FileCam::setRingBufferSize( unsigned int nFrames)
+{}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::FileCam::stopCamera()
+{
+  if( p_cameraIsRunning)
+  {
+    p_cameraIsRunning = false;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+long
+liblmbcam::FileCam::mostRecentFrameIndex()
+{
+  if( p_cameraIsRunning)
+  {
+    return p_writtenFrameCount - (long) 1;
+  }
+  else
+  {
+    return -1;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+long
+liblmbcam::FileCam::waitForFrameStarted( long frameIndex)
+{
+  if( frameIndex < 0)
+  {
+    return -1;
+  }
+  else
+  {
+    MutexLocker locker( &p_frameStartMutex);
+    while( p_writtenFrameCount < frameIndex)
+    {
+      pthread_cond_wait( &p_frameStartCond,
+                         &p_frameStartMutex);
+      p_readFrameCount = p_writtenFrameCount - (long) 1;
+    }
+
+    return frameIndex;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:FileCam::waitForFrameFinished( long frameIndex)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+long
+liblmbcam::FileCam::waitForFrameFinished( long frameIndex)
+{
+  if( frameIndex < 0)
+  {
+    return -1;
+  }
+  else
+  {
+    MutexLocker locker( &p_frameFinishMutex);
+    while( p_writtenFrameCount - (long) 1 < frameIndex)
+    {
+      pthread_cond_wait( &p_frameFinishCond,
+                         &p_frameFinishMutex);
+      p_readFrameCount = p_writtenFrameCount;
+    }
+
+    return frameIndex;
+  }
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FileCam::tryLockFrame( long frameIndex)
+{
+  if( p_data != 0)
+      return true;
+  else
+      return false;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned char*
+liblmbcam::FileCam::getFrame( long frameIndex)
+{
+  return p_data;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::FileCam::unlockFrame()
+{}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::FileCam::isCompressed() const
+{
+  return false;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::FileCam::nComponents() const
+{
+  return 1;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+double
+liblmbcam::FileCam::bytePerPixel() const
+{
+  return 1;
+}
+

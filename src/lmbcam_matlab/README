@@ -1,0 +1,6 @@
+Installation requirements:
+==========================
+
+Before running make, modify the matlab include path in Makefile.am to
+your local settings. The mex executable has to be somwhere in your
+PATH too (e.g. check with `which`).
