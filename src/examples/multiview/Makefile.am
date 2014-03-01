@@ -1,7 +1,7 @@
 AM_CXXFLAGS = -Wall -g
 
-LIBLMBCAM_CFLAGS := -I$(top_srcdir)/src/liblmbcam
-LIBLMBCAM_LIBS := -L$(top_builddir)/src/liblmbcam -llmbcam
+LIBLMBCAM_CFLAGS = -I$(top_srcdir)/src/liblmbcam
+LIBLMBCAM_LIBS = -L$(top_builddir)/src/liblmbcam -llmbcam
 
 bin_PROGRAMS = multiview
 

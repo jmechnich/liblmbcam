@@ -1,11 +1,9 @@
 AM_CXXFLAGS = -Wall -g 
 
-MOC      = @qt3_MOC@
-
-LIBLMBCAM_CFLAGS := -I$(top_srcdir)/src/liblmbcam
-LIBQLMBCAM_CFLAGS := -I$(top_srcdir)/src/libqlmbcam
-LIBLMBCAM_LIBS := -L$(top_builddir)/src/liblmbcam -llmbcam
-LIBQLMBCAM_LIBS := -L$(top_builddir)/src/libqlmbcam -lqlmbcam
+LIBLMBCAM_CFLAGS = -I$(top_srcdir)/src/liblmbcam
+LIBQLMBCAM_CFLAGS = -I$(top_srcdir)/src/libqlmbcam
+LIBLMBCAM_LIBS = -L$(top_builddir)/src/liblmbcam -llmbcam
+LIBQLMBCAM_LIBS = -L$(top_builddir)/src/libqlmbcam -lqlmbcam
 
 bin_PROGRAMS = qlmbcam
 
@@ -14,7 +12,7 @@ qlmbcam_CXXFLAGS = \
 	$(LIBQLMBCAM_CFLAGS) \
 	$(LIBFIDWID_CFLAGS) \
 	$(LIBCMDLINE_CFLAGS) \
-	@qt3_CFLAGS@
+	@QtGui_CFLAGS@
 
 qlmbcam_DEPENDENCIES = $(top_builddir)/src/libqlmbcam/libqlmbcam.la
 
@@ -33,7 +31,7 @@ qlmbcam_LDFLAGS = $(LIBQLMBCAM_LIBS) \
 	$(LIBFIDWID_LIBS) \
 	$(LIBLMBCAM_LIBS) \
 	$(LIBCMDLINE_LIBS) \
-	@qt3_LIBS@
+	@QtGui_LIBS@
 
 #  Rules for moc
 #

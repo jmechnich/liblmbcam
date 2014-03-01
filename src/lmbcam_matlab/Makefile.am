@@ -2,7 +2,7 @@ MEX = mex
 MEXFLAGS = -g $(LIBFIDWID_CFLAGS) @libdc1394_CFLAGS@ @libraw1394_CFLAGS@ @qt3_CFLAGS@
 SUFFIXES = .c .mexglx
 CXXFLAGS = -Wall -g $(LIBFIDWID_CFLAGS) @libdc1394_CFLAGS@ @libraw1394_CFLAGS@ @qt3_CFLAGS@
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(top_srcdir)/src/liblmbcam \
 	-I$(top_srcdir)/src/libqlmbcamwid
 

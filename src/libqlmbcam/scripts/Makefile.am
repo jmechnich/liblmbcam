@@ -5,17 +5,11 @@
 PACKAGEPREFIX = $(prefix)
 PACKAGENAME = libqlmbcam
 PACKAGEVERSION = $(VERSION)
-PACKAGELOCALCFLAGS = -I$(abs_top_srcdir)/src/libqlmbcam
-PACKAGELOCALLIBDIR = $(abs_top_builddir)/src/libqlmbcam/.libs
 PACKAGELIBS = -lqlmbcam
 PACKAGELTLIBS = $(libdir)/libqlmbcam.la
-PACKAGELOCALLTLIBS = $(abs_top_builddir)/src/libqlmbcam/libqlmbcam.la
 PACKAGECFLAGS = -I$(includedir)/libqlmbcam
-PACKAGEEXTCFLAGS = $(CPPFLAGS) $(LIBFIDWID_CFLAGS) @qt3_CFLAGS@
-PACKAGELDFLAGS = $(LDFLAGS) $(LIBFIDWID_LIBS) @qt3_LIBS@
-
-abs_top_builddir := $(shell cd $(top_builddir) && pwd)
-abs_top_srcdir := $(shell cd $(top_srcdir) && pwd)
+PACKAGEEXTCFLAGS = $(CPPFLAGS) $(LIBFIDWID_CFLAGS) @QtGui_CFLAGS@
+PACKAGELDFLAGS = $(LDFLAGS) $(LIBFIDWID_LIBS) @QtGui_LIBS@
 
 #
 # 
@@ -26,13 +20,13 @@ gen_config = sed \
 	-e 's,_PACKAGENAME_,$(PACKAGENAME),g' \
 	-e 's,_PACKAGEVERSION_,$(PACKAGEVERSION),g' \
 	-e 's,_PACKAGELTLIBS_,$(PACKAGELTLIBS),g' \
-	-e 's,_PACKAGELOCALLTLIBS_,$(PACKAGELOCALLTLIBS),g' \
+	-e 's,_PACKAGELOCALLTLIBS_,`cd $(top_builddir) && pwd`/src/libqlmbcam/libqlmbcam.la,g' \
 	-e 's,_PACKAGECFLAGS_,$(PACKAGECFLAGS),g' \
 	-e 's,_PACKAGEEXTCFLAGS_,$(PACKAGEEXTCFLAGS),g' \
 	-e 's,_PACKAGELDFLAGS_,$(PACKAGELDFLAGS),g' \
-	-e 's,_PACKAGELOCALCFLAGS_,$(PACKAGELOCALCFLAGS),g' \
+	-e 's,_PACKAGELOCALCFLAGS_,-I`cd $(top_srcdir) && pwd`/src/libqlmbcam,g' \
 	-e 's,_PACKAGELIBS_,$(PACKAGELIBS),g' \
-	-e 's,_PACKAGELOCALLIBDIR_,$(PACKAGELOCALLIBDIR),g'
+	-e 's,_PACKAGELOCALLIBDIR_,`cd $(top_builddir) && pwd`/src/libqlmbcam/.libs,g'
 
 $(PACKAGENAME)-config: package-config.in Makefile
 	$(gen_config) $< > $@

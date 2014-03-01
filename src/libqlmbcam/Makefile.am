@@ -1,11 +1,10 @@
 SUBDIRS = scripts
 
-AM_CXXFLAGS = -Wall -g -O4 @qt3_CFLAGS@
+AM_CXXFLAGS = -Wall -g -O4 @QtGui_CFLAGS@
 
 libqlmbcamincludedir = $(includedir)/libqlmbcam
 
-INCLUDES =-I$(top_srcdir)/src/liblmbcam $(LIBFIDWID_CFLAGS)
-MOC      = @qt3_MOC@
+AM_CPPFLAGS =-I$(top_srcdir)/src/liblmbcam $(LIBFIDWID_CFLAGS)
 
 MOC_GEN_SOURCES = moc_QlmbCamBusWidget.cc \
 		moc_QlmbCamVideoWidget.cc \
@@ -15,7 +14,7 @@ lib_LTLIBRARIES = libqlmbcam.la
 
 libqlmbcam_la_LDFLAGS = \
 	-version-info @lt_major@:@lt_revision@:@lt_age@ \
-	@qt3_LIBS@
+	@QtGui_LIBS@
 
 libqlmbcam_la_SOURCES = \
 	Bayer.cc \

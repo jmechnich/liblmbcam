@@ -109,6 +109,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <limits.h>
 
 namespace liblmbcam
 {

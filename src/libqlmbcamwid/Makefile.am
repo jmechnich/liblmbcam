@@ -1,9 +1,8 @@
-AM_CXXFLAGS = -Wall -g -O4 @qt3_CFLAGS@
+AM_CXXFLAGS = -Wall -g -O4 @QtGui_CFLAGS@
 
 libqlmbcamwidincludedir = $(includedir)/libqlmbcamwid
 
-INCLUDES = -I$(top_srcdir)/src/liblmbcam $(LIBFIDWID_CFLAGS)
-MOC = @qt3_MOC@
+AM_CPPFLAGS = -I$(top_srcdir)/src/liblmbcam $(LIBFIDWID_CFLAGS)
 
 MOC_GEN_SOURCES = moc_QlmbCamMainWidget.cc \
 		moc_QlmbCamParamControl.cc \

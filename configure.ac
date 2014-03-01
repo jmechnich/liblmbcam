@@ -1,9 +1,9 @@
-AC_INIT(Makefile.am)
-
+AC_INIT([liblmbcam],[0.1.0])
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
-
-AM_INIT_AUTOMAKE(liblmbcam,0.1.0)
+AC_CONFIG_SRCDIR([src/liblmbcam/LMBCam.hh])
+AC_CONFIG_MACRO_DIR([m4])
+AM_INIT_AUTOMAKE
 
 AC_ARG_WITH([qt],
 	    AC_HELP_STRING([--with-qt],
@@ -35,14 +35,8 @@ AC_CACHE_SAVE
 PKG_PROG_PKG_CONFIG([0.17])
 
 if test $with_qt = "yes"; then
-	PKG_CHECK_MODULES([qt3], [qt-mt >= 3.3.0])
-	AC_PATH_PROG([qt3_MOC], [moc-qt3], [no])
-	if test $qt3_MOC = "no"; then
-	   AC_PATH_PROG([qt3_MOC], [moc], [no])
-	   if test $qt3_MOC = "no"; then
-	      AC_MSG_ERROR( Could not find moc)
-	   fi
-	fi
+        PKG_CHECK_MODULES([QtGui], [QtGui >= 4.8.4])
+        AC_CHECK_PROG(MOC, [moc], [moc])
 else
 	enable_examples=no
 fi
@@ -57,7 +51,8 @@ AC_CACHE_SAVE
 PKG_CHECK_MODULES([libraw1394], [libraw1394])
 
 # Check for libdc1394
-PKG_CHECK_MODULES([libdc1394], [libdc1394], [], [AC_CHECK_LIBDC])
+PKG_CHECK_MODULES([libdc1394], [libdc1394], [], [
+    PKG_CHECK_MODULES([libdc1394], [libdc1394-2], [], [AC_CHECK_LIBDC])])
 
 if test -n $libdc1394_LIBS; then libdc1394_LIBS=-ldc1394_control; fi
 
