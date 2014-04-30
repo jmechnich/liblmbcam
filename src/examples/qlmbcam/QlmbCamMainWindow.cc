@@ -60,12 +60,12 @@
 #include <fstream>
 #include <sstream>
 
-#include <qlayout.h>
-#include <qapplication.h>
-#include <qmessagebox.h>
-#include <qmenubar.h>
-#include <qpopupmenu.h>
-#include <qspinbox.h> 
+#include <QLayout>
+#include <QApplication>
+#include <QMessageBox>
+#include <QMenuBar>
+#include <QMenu>
+#include <QSpinBox> 
 
 
 /*=========================================================================
@@ -74,46 +74,51 @@
  *                                        WFlags f)
  *  ==> see headerfile
  *=======================================================================*/
-QlmbCamMainWindow::QlmbCamMainWindow( QWidget* parent, const char* name,
-                                      WFlags f)
-        :QWidget( parent, name, f), _camera( 0 ), _saveThread(0), _save_progressDialog(0)
+QlmbCamMainWindow::QlmbCamMainWindow( QWidget* parent)
+        :QWidget( parent), _camera( 0 ), _saveThread(0), _save_progressDialog(0)
 {
-  setCaption( "qlmbcam - Main Window");
-  QVBoxLayout* mainLayout = new QVBoxLayout( this, 5, -1, "mainLayout");
-  QMenuBar* menuBar = new QMenuBar( this, "menuBar");
+  setWindowTitle( "qlmbcam - Main Window");
 
-  QPopupMenu *file = new QPopupMenu( this );
-  file->insertItem( "&Load camera settings...",
-                    this, SLOT( loadSettings()), CTRL+Key_L );
-  file->insertItem( "&Save camera settings...",
-                    this, SLOT( saveSettings()), CTRL+Key_S );
-  file->insertSeparator();
-  file->insertItem( "&Quit", qApp, SLOT( quit()), CTRL+Key_C );
-  menuBar->insertItem( "&File", file );
+  QVBoxLayout* mainLayout = new QVBoxLayout;
+  mainLayout->setMargin( 5);
+  mainLayout->setSpacing( -1);
+
+  QMenuBar* menuBar = new QMenuBar( this);
+
+  QMenu *file = new QMenu( "&File", this );
+  file->addAction( "&Load camera settings...",
+                   this, SLOT( loadSettings()), Qt::CTRL+Qt::Key_L );
+  file->addAction( "&Save camera settings...",
+                   this, SLOT( saveSettings()), Qt::CTRL+Qt::Key_S );
+  file->addSeparator();
+  file->addAction( "&Quit", qApp, SLOT( quit()), Qt::CTRL+Qt::Key_C );
+  menuBar->addMenu( file );
 
   mainLayout->setMenuBar( menuBar);
   
-  QHBoxLayout* viewLayout = new QHBoxLayout( mainLayout, -1, "viewLayout");
-
-  _grab_spinbox = new QSpinBox( 1,300,1, this, "grab_spinbox");
+  QHBoxLayout* viewLayout = new QHBoxLayout;
+  _grab_spinbox = new QSpinBox( this);
+  _grab_spinbox->setMinimum( 1);
+  _grab_spinbox->setMaximum( 300);
+  _grab_spinbox->setSingleStep( 1);
   _grab_spinbox->setValue(1);
   
-
-  _busWidget = new QlmbCamBusWidget( this, "_busWidget");
+  _busWidget = new QlmbCamBusWidget( this);
   _busWidget->rescan();
   viewLayout->addWidget( _busWidget);
   
   connect( _busWidget, SIGNAL( cameraSelectionChanged( liblmbcam::LMBCam*)),
            this, SLOT( setActiveCamera( liblmbcam::LMBCam*)));
   
-  _camWidget = new QlmbCamWidget( 0, this, "_camWidget");
+  _camWidget = new QlmbCamWidget( 0, this);
   _camWidget->setMinimumWidth( 350);
   viewLayout->addWidget( _camWidget);
 
   connect( _camWidget, SIGNAL( startCamera()), this, SLOT( startCamera()));
   connect( _camWidget, SIGNAL( stopCamera()), this, SLOT( stopCamera()));
- 
-  QHBoxLayout* buttonLayout = new QHBoxLayout( mainLayout, -1, "buttonLayout");
+  mainLayout->addLayout( viewLayout);
+  
+  QHBoxLayout* buttonLayout = new QHBoxLayout;
  
   QPushButton* rescanButton = new QPushButton( "Rescan bus", this);
   connect( rescanButton, SIGNAL( clicked()), this, SLOT( rescanBus()));
@@ -143,6 +148,8 @@ QlmbCamMainWindow::QlmbCamMainWindow( QWidget* parent, const char* name,
   buttonLayout->addWidget( _ngrabButton);
   buttonLayout->addWidget(_grab_spinbox);
 
+  mainLayout->addLayout( buttonLayout);
+  setLayout( mainLayout);
   
   resize( 600, 500);
 }
@@ -201,13 +208,13 @@ QlmbCamMainWindow::loadSettings()
   else
   {
     QString filename = QFileDialog::getOpenFileName(
-        QString( _camera->guid().c_str()) + ".cam", "*.cam",
-        this, "loadsettingsdialog", "Load Settings ...");
+        this, "Load Settings ...",
+        QString( _camera->guid().c_str()) + ".cam", "*.cam");
     if( filename != QString::null)
     {
       try
       {
-        std::ifstream stream( filename.latin1());
+        std::ifstream stream( filename.toLatin1().data());
 
         int stop =
             QMessageBox::information( this, "Load Settings ...",
@@ -255,11 +262,11 @@ QlmbCamMainWindow::saveSettings()
   else
   {
     QString filename = QFileDialog::getSaveFileName(
-        QString( _camera->guid().c_str()) + ".cam", "*.cam",
-        this, "savesettingsdialog", "Save Settings ...");
+        this, "Save Settings ...",
+        QString( _camera->guid().c_str()) + ".cam",  "*.cam");
     if( filename != QString::null)
     {
-      std::ofstream stream( filename.latin1());
+      std::ofstream stream( filename.toLatin1().data());
       _camera->writeState( stream);
     }
   }
@@ -307,8 +314,7 @@ QlmbCamMainWindow::grabImage()
     {
       it->second->setFocus();
       QString filename = QFileDialog::getSaveFileName(
-          QString::null, QString::null,
-          this, "saveimagedialog", "Save Image ...");
+          this, "Save Image ...");
       if( filename != QString::null)
       {
         it->second->saveCurrentImage( filename);
@@ -357,9 +363,11 @@ QlmbCamMainWindow::ngrabImage()
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
  *=======================================================================*/
-void 
-QlmbCamMainWindow::customEvent(QCustomEvent* cevent)
+bool
+QlmbCamMainWindow::event( QEvent* cevent)
 {
+  if( cevent->type() < QEvent::User)
+      return QWidget::event( cevent);
   
   /*-------------------------------------------------------------------------
    * Start Thread for saving files to disk 
@@ -368,8 +376,7 @@ QlmbCamMainWindow::customEvent(QCustomEvent* cevent)
   {
     BufferFullEvent* e = dynamic_cast<BufferFullEvent*>(cevent);  
     QString filename = QFileDialog::getSaveFileName(
-        QString::null, QString::null,
-        this, "saveimagedialog", "Save Images ...");
+        this, "Save Images ...");
     
     //start thread to save images
     _saveThread = new QlmbCamSaveThread( e->buffer(), 
@@ -394,18 +401,19 @@ QlmbCamMainWindow::customEvent(QCustomEvent* cevent)
     if ( _save_progressDialog == 0 )
     {
       QString caption = "Grabbing %1 Images";
-      _save_progressDialog = new QProgressDialog( caption.arg(e->nFrames()),0, e->nFrames(),  0, "savingprogress", FALSE, 0 );
-      _save_progressDialog->setCaption("Saving");
-      _save_progressDialog->setProgress(e->actual_frame());
+      _save_progressDialog = new QProgressDialog(
+          caption.arg(e->nFrames()), QString(), 0, e->nFrames());
+      _save_progressDialog->setWindowTitle("Saving");
+      _save_progressDialog->setValue(e->actual_frame());
     }
     else 
     {
-      _save_progressDialog->setProgress(e->actual_frame());
+      _save_progressDialog->setValue(e->actual_frame());
     }
     
      if (e->actual_frame() == e->nFrames()) 
      {
-       _save_progressDialog->~QProgressDialog();
+       delete _save_progressDialog;
        _save_progressDialog=0;
      }
     
@@ -422,21 +430,22 @@ QlmbCamMainWindow::customEvent(QCustomEvent* cevent)
     if (_save_progressDialog == 0)
     {
       QString caption = "Writing %1 Images to Disk";
-      _save_progressDialog = new QProgressDialog( caption.arg(e->nFrames()),0, e->nFrames(),  0, "savingprogress", FALSE, 0 );
-      _save_progressDialog->setProgress( e->actual_frame());
-      _save_progressDialog->setCaption("Saving");
+      _save_progressDialog = new QProgressDialog(
+          caption.arg(e->nFrames()), QString(), 0, e->nFrames());
+      _save_progressDialog->setValue( e->actual_frame());
+      _save_progressDialog->setWindowTitle("Saving");
     }
     else
     {
-      _save_progressDialog->setProgress( e->actual_frame() );
+      _save_progressDialog->setValue( e->actual_frame() );
     }
     
     if ( e->saveDone() )
     {
-      _save_progressDialog->~QProgressDialog();
+      delete _save_progressDialog;
+      _save_progressDialog = 0;
       _ngrabButton->setEnabled(true);
       _saveThread = 0;
-      _save_progressDialog = 0;
     }
   }
 }
@@ -465,7 +474,7 @@ QlmbCamMainWindow::startCamera()
             << _camera->model() << " ("
             << _camera->mode() << ", "
             << _camera->framerate() << " fps)";
-    tmp->setCaption( QString( caption.str().c_str()));
+    tmp->setWindowTitle( QString( caption.str().c_str()));
         
     connect( tmp, SIGNAL( aboutToClose()),
              this, SLOT( removeWidgetAndStopCamera()));
@@ -575,7 +584,7 @@ QlmbCamMainWindow::closeEvent(QCloseEvent* e)
 {
   if( _saveThread)
   {
-    if ( _saveThread->running() ) 
+    if ( _saveThread->isRunning() ) 
     {
       int answer = QMessageBox::question( this, "Quit",
                                           "Still saving Images! Really Quit?", 

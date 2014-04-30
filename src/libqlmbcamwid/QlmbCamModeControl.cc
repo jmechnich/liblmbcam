@@ -33,9 +33,9 @@
 
 #include "QlmbCamModeControl.hh"
 
-#include <qlayout.h>
-#include <qpushbutton.h>
-#include <qcombobox.h>
+#include <QLayout>
+#include <QPushButton>
+#include <QComboBox>
 
 #include <string>
 #include <vector>
@@ -48,64 +48,72 @@ QlmbCamModeControlWidget::QlmbCamModeControlWidget( LMBCam* camera,
                                                     QWidget* parent)
         :QWidget( parent), p_camera( camera)
 {
-  QVBoxLayout* layout = new QVBoxLayout( this);
-  QHBoxLayout* modeLayout = new QHBoxLayout( layout);
+  QVBoxLayout* layout = new QVBoxLayout;
+  QHBoxLayout* modeLayout = new QHBoxLayout;
   modeLayout->addWidget( new QLabel( "Mode:", this));
   p_modeCombo = new QComboBox( this);
   p_modeCombo->setEditable( false);
   modeLayout->addWidget( p_modeCombo);
+  layout->addLayout( modeLayout);
   
-  QHBoxLayout* framerateLayout = new QHBoxLayout( layout);
+  QHBoxLayout* framerateLayout = new QHBoxLayout;
   framerateLayout->addWidget( new QLabel( "Framerate:", this));
   p_framerateCombo = new QComboBox( this);
   p_framerateCombo->setEditable( false);
   framerateLayout->addWidget( p_framerateCombo);
+  layout->addLayout( framerateLayout);
 
-  QHBoxLayout* leftLayout = new QHBoxLayout( layout);
+  QHBoxLayout* leftLayout = new QHBoxLayout;
   leftLayout->addWidget( new QLabel( "Left:", this));
   p_left = new QLineEdit( QString::number( p_camera->left()),
                           this);
   leftLayout->addWidget( p_left);
+  layout->addLayout( leftLayout);
 
-  QHBoxLayout* topLayout = new QHBoxLayout( layout);
+  QHBoxLayout* topLayout = new QHBoxLayout;
   topLayout->addWidget( new QLabel( "Top:", this));
   p_top = new QLineEdit( QString::number( p_camera->top()),
                          this);
   topLayout->addWidget( p_top);
+  layout->addLayout( topLayout);
 
-  QHBoxLayout* widthLayout = new QHBoxLayout( layout);
+  QHBoxLayout* widthLayout = new QHBoxLayout;
   widthLayout->addWidget( new QLabel( "Width:", this));
   p_width = new QLineEdit( QString::number( p_camera->width()),
                            this);
   widthLayout->addWidget( p_width);
+  layout->addLayout( widthLayout);
 
-  QHBoxLayout* maxWidthLayout = new QHBoxLayout( layout);
+  QHBoxLayout* maxWidthLayout = new QHBoxLayout;
   maxWidthLayout->addWidget( new QLabel( "Max Width:", this));
   p_maxWidth = new QLabel( QString::number( p_camera->maxWidth()),
                            this);
   maxWidthLayout->addWidget( p_maxWidth);
+  layout->addLayout( maxWidthLayout);
 
-  QHBoxLayout* heightLayout = new QHBoxLayout( layout);
+  QHBoxLayout* heightLayout = new QHBoxLayout;
   heightLayout->addWidget( new QLabel( "Height:", this));
   p_height = new QLineEdit( QString::number( p_camera->height()),
                             this);
   heightLayout->addWidget( p_height);
+  layout->addLayout( heightLayout);
   
-  QHBoxLayout* maxHeightLayout = new QHBoxLayout( layout);
+  QHBoxLayout* maxHeightLayout = new QHBoxLayout;
   maxHeightLayout->addWidget( new QLabel( "Max Height:", this));
   p_maxHeight = new QLabel( QString::number( p_camera->maxHeight()),
                             this);
   maxHeightLayout->addWidget( p_maxHeight);
+  layout->addLayout( maxHeightLayout);
 
   int count = 0;
   std::vector<std::string> modes = p_camera->availableModes();
   for( std::vector<std::string>::const_iterator it = modes.begin();
        it != modes.end(); ++it)
   {
-    p_modeCombo->insertItem( (*it).c_str());
+    p_modeCombo->addItem( (*it).c_str());
     if( *it == p_camera->mode())
     {
-      p_modeCombo->setCurrentItem( count);
+      p_modeCombo->setCurrentIndex( count);
       if( it->substr( 0, 7) == "Format7")
       {
         updateFormat7Controls();
@@ -152,10 +160,10 @@ QlmbCamModeControlWidget::updateFramerateCombo()
   for( std::vector<double>::const_iterator it2 = framerates.begin();
        it2 != framerates.end(); ++it2)
   {
-    p_framerateCombo->insertItem( QString::number( *it2));
+    p_framerateCombo->addItem( QString::number( *it2));
     if( *it2 == p_camera->framerate())
     {
-      p_framerateCombo->setCurrentItem( count);
+      p_framerateCombo->setCurrentIndex( count);
     }
     ++count;
   }
@@ -171,7 +179,7 @@ void
 QlmbCamModeControlWidget::updateFormat7Controls()
 {
   p_framerateCombo->setDisabled( true);
-  p_framerateCombo->setCurrentText( QString::number( p_camera->framerate()));
+  p_framerateCombo->setEditText( QString::number( p_camera->framerate()));
   p_left->setText( QString::number( p_camera->left()));
   p_top->setText( QString::number( p_camera->top()));
   p_width->setText( QString::number( p_camera->width()));

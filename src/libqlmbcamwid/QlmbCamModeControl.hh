@@ -27,11 +27,11 @@
 #ifndef QLMBCAMMODECONTROL_HH
 #define QLMBCAMMODECONTROL_HH
 
-#include <qwidget.h>
-#include <qlabel.h>
-#include <qlineedit.h>
-#include <qvalidator.h>
-#include <qmessagebox.h>
+#include <QWidget>
+#include <QLabel>
+#include <QLineEdit>
+#include <QValidator>
+#include <QMessageBox>
 #include <LMBCam.hh>
 #include <LMBCamError.hh>
 

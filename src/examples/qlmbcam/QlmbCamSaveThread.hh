@@ -32,9 +32,9 @@
 #ifndef QLMBCAMSAVETHREAD_HH
 #define QLMBCAMSAVETHREAD_HH
 
-#include <qthread.h>
-#include <qstring.h>
-#include <qevent.h> 
+#include <QThread>
+#include <QString>
+#include <QEvent> 
 #include <tiffio.h>
 
 
@@ -50,15 +50,15 @@ namespace libqlmbcam
   };
   
   
-  class SaveDoneEvent : public QCustomEvent
+  class SaveDoneEvent : public QEvent
   {
   public:
     SaveDoneEvent(unsigned int actual_frame, unsigned int nFrames)
-            :QCustomEvent(saveDoneE), _actual_frame(actual_frame), _nFrames(nFrames)
+            :QEvent(Type(saveDoneE)), _actual_frame(actual_frame), _nFrames(nFrames)
           {}
     
-    SaveDoneEvent( void )
-            :QCustomEvent(saveDoneE),_actual_frame(0),_nFrames(0) //Dummy
+    SaveDoneEvent()
+    :QEvent(Type(saveDoneE)),_actual_frame(0),_nFrames(0) //Dummy
           {}
     
     

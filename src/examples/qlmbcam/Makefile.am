@@ -35,7 +35,7 @@ qlmbcam_LDFLAGS = $(LIBQLMBCAM_LIBS) \
 
 #  Rules for moc
 #
-moc_%.cc: %.hh
+$(MOC_GEN_SOURCES): moc_%.cc: %.hh
 	$(MOC) $< -o $@
 
 MOSTLYCLEANFILES = $(MOC_GEN_SOURCES)

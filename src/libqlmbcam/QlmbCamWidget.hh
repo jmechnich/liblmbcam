@@ -27,13 +27,13 @@
 #ifndef QLMBCAMWIDGET_HH
 #define QLMBCAMWIDGET_HH
 
-#include <qscrollview.h>
-#include <qcombobox.h>
-#include <qslider.h>
-#include <qcheckbox.h>
-#include <qgrid.h>
-#include <qlabel.h>
-#include <qlineedit.h>
+#include <QScrollArea>
+#include <QComboBox>
+#include <QSlider>
+#include <QCheckBox>
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
 
 #include <map>
 
@@ -42,13 +42,12 @@
 
 namespace libqlmbcam
 {
-  class QlmbCamWidget : public QScrollView
+  class QlmbCamWidget : public QScrollArea
   {
     Q_OBJECT
 
   public:
-    QlmbCamWidget( liblmbcam::LMBCam* camera=0, QWidget* parent=0,
-                   const char* name=0, WFlags f=0);
+    QlmbCamWidget( liblmbcam::LMBCam* camera=0, QWidget* parent=0);
 
     virtual ~QlmbCamWidget();
 
@@ -77,15 +76,15 @@ namespace libqlmbcam
 
     QLineEdit* createLineEdit( const QString& name,
                                liblmbcam::LMBCamParam* param,
-                               QGrid* parent);
+                               QGridLayout* parent);
   
     QSlider* createSlider( const QString& name,
                            liblmbcam::LMBCamParam* param,
-                           QGrid* parent);
+                           QGridLayout* parent);
   
     QCheckBox* createCheckBox( const QString& name,
                                liblmbcam::LMBCamParam* param,
-                               QGrid* parent);
+                               QGridLayout* parent);
   
     liblmbcam::LMBCam* _camera;
     QWidget* _controls;

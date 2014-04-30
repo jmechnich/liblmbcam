@@ -23,6 +23,8 @@
 
 #include "LMBCamFileIO.hh"
 
+#include <algorithm>
+
 std::vector<std::string> liblmbcam::LMBCamFileIO::_formats;
 
 /*=========================================================================
@@ -45,7 +47,7 @@ liblmbcam::LMBCamFileIO::loadImageFile( std::istream& is,
     }
   }
   
-  return false;
+  return 0;
 }
 
 /*=========================================================================

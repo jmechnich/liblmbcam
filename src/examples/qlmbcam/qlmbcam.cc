@@ -36,7 +36,7 @@
 #include <CmdLine.hh>
 #include <ArgvIter.hh>
 
-#include <qapplication.h>
+#include <QApplication>
 
 #include "QlmbCamMainWindow.hh"
 
@@ -69,7 +69,6 @@ int main( int argc, char** argv)
      *---------------------------------------------------------------------*/
     QApplication app( argc, argv);
     QlmbCamMainWindow widget;
-    app.setMainWidget( &widget);
     widget.show();
     return app.exec();
   }

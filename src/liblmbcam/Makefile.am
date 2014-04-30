@@ -1,6 +1,6 @@
 SUBDIRS = etc scripts
 
-AM_CXXFLAGS = -Wall -g -O2 -D_REENTRANT -DLIBLMBCAMDEBUG @libraw1394_CFLAGS@ @libraw1394_CFLAGS@ 
+AM_CPPFLAGS = -Wall -g -O2 -D_REENTRANT -DLIBLMBCAMDEBUG @libraw1394_CFLAGS@ @libraw1394_CFLAGS@ 
 
 lib_LTLIBRARIES = liblmbcam.la
 
@@ -9,10 +9,6 @@ liblmbcam_la_LDFLAGS = 	\
 	@libdc1394_LIBS@ @libraw1394_LIBS@ -lpthread
 
 liblmbcam_la_SOURCES =	FileCam.cc \
-			FireCam.cc \
-			FireCamBusRegistry.cc \
-			FireCamBus.cc \
-			FireCamParam.cc \
 			LMBCam.cc \
 			LMBCamBusIndex.cc \
 			LMBCamFileIO.cc \
@@ -20,6 +16,15 @@ liblmbcam_la_SOURCES =	FileCam.cc \
 #			V4LCam.cc \
 #			V4LCamBus.cc \
 #			V4LCamParam.cc
+
+if HAVE_LIBDC1394
+#AM_CPPFLAGS += -DHAVE_LIBDC1394
+#liblmbcam_la_SOURCES += \
+#	FireCam.cc \
+#	FireCamBusRegistry.cc \
+#	FireCamBus.cc \
+#	FireCamParam.cc
+endif
 
 pkginclude_HEADERS =	AtomicCounter.hh \
 			AtomicCounter.icc \

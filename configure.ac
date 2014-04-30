@@ -54,7 +54,7 @@ PKG_CHECK_MODULES([libraw1394], [libraw1394])
 PKG_CHECK_MODULES([libdc1394], [libdc1394], [], [
     PKG_CHECK_MODULES([libdc1394], [libdc1394-2], [], [AC_CHECK_LIBDC])])
 
-if test -n $libdc1394_LIBS; then libdc1394_LIBS=-ldc1394_control; fi
+AM_CONDITIONAL([HAVE_LIBDC1394], [test x"$libdc1394_LIBS" != x])
 
 # Check for libtif
 AC_CHECK_HEADER( tiffio.h, [], AC_MSG_ERROR( libtiff headers are missing))
@@ -88,6 +88,8 @@ AC_SUBST(LIBCMDLINE_CFLAGS)
 AC_SUBST(LIBCMDLINE_LIBS)
 AC_SUBST(LIBFIDWID_CFLAGS)
 AC_SUBST(LIBFIDWID_LIBS)
+
+AC_SUBST(HAVE_LIBDC1394)
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])

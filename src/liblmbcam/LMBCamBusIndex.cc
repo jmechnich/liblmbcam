@@ -26,26 +26,34 @@
 
 #include "LMBCamBusIndex.hh"
 
+#ifdef HAVE_LIBDC1394
 #include "FireCamBus.hh"
+#endif
 
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
  *=======================================================================*/
-liblmbcam::LMBCamBusIndex::LMBCamBusIndex()
+liblmbcam::LMBCamBusIndex::LMBCamBusIndex( BusType type)
+        : _type( type)
 {
-  /*-----------------------------------------------------------------------
-   *  Search for firewire busses
-   *-----------------------------------------------------------------------*/
-  raw1394handle_t handle = raw1394_new_handle();
-  int nPorts = raw1394_get_port_info( handle, 0, 0);
-  raw1394_destroy_handle( handle);
-
-  for( int i=0; i < nPorts; ++i)
+  if( _type & FireCam)
   {
-    std::ostringstream oss;
-    oss << "FireCamBus_" << i;
-    _busses[oss.str()] = new FireCamBus( i);
+#ifdef HAVE_LIBDC1394
+    /*---------------------------------------------------------------------
+     *  Search for firewire busses
+     *---------------------------------------------------------------------*/
+    raw1394handle_t handle = raw1394_new_handle();
+    int nPorts = raw1394_get_port_info( handle, 0, 0);
+    raw1394_destroy_handle( handle);
+    
+    for( int i=0; i < nPorts; ++i)
+    {
+      std::ostringstream oss;
+      oss << "FireCamBus_" << i;
+      _busses[oss.str()] = new FireCamBus( i);
+    }
+#endif
   }
 }
 
@@ -55,14 +63,26 @@ liblmbcam::LMBCamBusIndex::LMBCamBusIndex()
  *=======================================================================*/
 liblmbcam::LMBCamBusIndex::~LMBCamBusIndex()
 {
-// This should be done but causes the program to hang on deletion of the
-//   raw1394 handle, FIX ME
+  for( std::map<std::string,LMBCamBus*>::iterator it=_busses.begin();
+       it!=_busses.end(); ++it)
+  {
+    delete it->second;
+  }
+}
 
-//   for( std::map<std::string,LMBCamBus*>::iterator it=_busses.begin();
-//        it!=_busses.end(); ++it)
-//   {
-//     delete it->second;
-//   }
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+unsigned int liblmbcam::LMBCamBusIndex::nCameras() const
+{
+  unsigned int ret = 0;
+  for( std::map<std::string,LMBCamBus*>::const_iterator it=_busses.begin();
+       it!=_busses.end(); ++it)
+  {
+    ret += it->second->nCameras();
+  }
+  return ret;
 }
 
 /*=========================================================================
@@ -70,40 +90,38 @@ liblmbcam::LMBCamBusIndex::~LMBCamBusIndex()
  *  ==> see headerfile
  *=======================================================================*/
 liblmbcam::LMBCam*
-liblmbcam::LMBCamBusIndex::findCamera( const std::string& guid) const
+liblmbcam::LMBCamBusIndex::cameraByIndex( unsigned int index) const
 {
   for( std::map<std::string,LMBCamBus*>::const_iterator it=_busses.begin();
        it!=_busses.end(); ++it)
   {
-    try
+    unsigned int ncams = it->second->nCameras();
+    if( ncams <= index)
     {
-      return it->second->cameraByGUID( guid);
+      index -= ncams;
+      continue;
     }
-    catch(...)
-    {
-    }
+    return it->second->cameraByIndex( index);
   }
   return 0;
 }
-
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
  *=======================================================================*/
 liblmbcam::LMBCam*
-liblmbcam::LMBCamBusIndex::getFirstCamera() const
+liblmbcam::LMBCamBusIndex::cameraByGUID( const std::string& guid) const
 {
   for( std::map<std::string,LMBCamBus*>::const_iterator it=_busses.begin();
        it!=_busses.end(); ++it)
   {
-    try
+    unsigned int ncams = it->second->nCameras();
+    for( unsigned int i=0; i < ncams; ++i)
     {
-      return it->second->cameraByIndex( 0);
-    }
-    catch(...)
-    {
+      LMBCam* cam = it->second->cameraByIndex( i);
+      if( cam->guid() == guid)
+          return cam;
     }
   }
   return 0;
 }
-

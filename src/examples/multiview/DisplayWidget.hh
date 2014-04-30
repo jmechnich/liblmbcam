@@ -31,20 +31,20 @@
 #ifndef DISPLAYWIDGET_HH
 #define DISPLAYWIDGET_HH
 
-#include <qscrollview.h>
+#include <OpenGLFidWidget.hh>
+#include <FastImageDisplayWid.hh>
+#include <PixelConverter.hh>
 
-#include <unistd.h>
+#include <QScrollArea>
 
 #include <LMBCam.hh>
 #include <LMBCamParam.hh>
 
-#include <FastImageDisplayWid.hh>
-#include <OpenGLFidWidget.hh>
-#include <PixelConverter.hh>
+#include <unistd.h>
 
 using namespace liblmbcam;
 
-class DisplayWidget: public QScrollView
+class DisplayWidget: public QScrollArea
 {
 public:
   DisplayWidget(LMBCam* camera, QWidget* parent=0);

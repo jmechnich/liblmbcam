@@ -80,11 +80,13 @@
 **
 **************************************************************************/
 
-#include <qmessagebox.h>
-#include <qpushbutton.h>
-#include <qhbox.h>
-#include <qlcdnumber.h>
-#include <qimage.h>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QLCDNumber>
+#include <QImage>
+#include <QSignalMapper>
+#include <QDesktopWidget>
 
 #include <fstream>
 
@@ -107,10 +109,8 @@ RGB16_RGBConverter  libqlmbcam::QlmbCamVideoWidget::_RGB16Conv;
  *  ==> see headerfile
  *=======================================================================*/
 libqlmbcam::QlmbCamVideoWidget::QlmbCamVideoWidget( liblmbcam::LMBCam* camera,
-                                                    QWidget* parent,
-                                                    const char* name,
-                                                    WFlags f)
-        :QScrollView( parent, name, f | Qt::WRepaintNoErase),
+                                                    QWidget* parent)
+        :QScrollArea( parent),
          _camera( camera), _updateThread( this),
          _doUpdate( false), _freeze( false),
          _data( 0), _extGrabData( 0), _grabNFrames( 0), _grabCurrentFrame( 0),
@@ -127,36 +127,68 @@ libqlmbcam::QlmbCamVideoWidget::QlmbCamVideoWidget( liblmbcam::LMBCam* camera,
                                 _camera->bytePerPixel());
   _data = (unsigned char*) malloc( _frameSize);
   
-  addChild( _fidWid);
-  setFocusPolicy(QWidget::StrongFocus);
+  setWidget( _fidWid);
+  setFocusPolicy(Qt::StrongFocus);
 
   fitSize();
   _wsize=size();
   _wpos=pos();
-  _parent=parent;
-  _wflags=getWFlags();
   
-  
-  _bayerPopup = new QPopupMenu( this);
-  _bayerPopup->insertItem( "No Bayer", 0);
-  _bayerPopup->insertItem( "Nearest", 1);
-  _bayerPopup->insertItem( "Edge Sense", 2);
-  _bayerPopup->insertItem( "Downsample", 3);
-  _bayerPopup->insertSeparator(4);
-  _bayerPopup->insertItem( "BGGR", 5);
-  _bayerPopup->insertItem( "GRBG", 6);
-  _bayerPopup->insertItem( "RGGB", 7);
-  _bayerPopup->insertItem( "GBRG", 8);
+  QSignalMapper* bayerMapper = new QSignalMapper(this);
+  QAction* action;
+  _bayerPopup = new QMenu( this);
+  action = new QAction( "No Bayer", _bayerPopup);
+  bayerMapper->setMapping( action, 0);
+  _bayerPopup->addAction( action);
+  connect( action, SIGNAL( triggered()), bayerMapper, SLOT( map()));
+  action = new QAction( "Nearest", _bayerPopup);
+  bayerMapper->setMapping( action, 1);
+  _bayerPopup->addAction( action);
+  connect( action, SIGNAL( triggered()), bayerMapper, SLOT( map()));
+  action = new QAction( "Edge Sense", _bayerPopup);
+  bayerMapper->setMapping( action, 2);
+  _bayerPopup->addAction( action);
+  connect( action, SIGNAL( triggered()), bayerMapper, SLOT( map()));
+  action = new QAction( "Downsample", _bayerPopup);
+  bayerMapper->setMapping( action, 3);
+  _bayerPopup->addAction( action);
+  connect( action, SIGNAL( triggered()), bayerMapper, SLOT( map()));
+  _bayerPopup->addSeparator();
+  action = new QAction( "BGGR", _bayerPopup);
+  bayerMapper->setMapping( action, 5);
+  _bayerPopup->addAction( action);
+  connect( action, SIGNAL( triggered()), bayerMapper, SLOT( map()));
+  action = new QAction( "GRBG", _bayerPopup);
+  bayerMapper->setMapping( action, 6);
+  _bayerPopup->addAction( action);
+  connect( action, SIGNAL( triggered()), bayerMapper, SLOT( map()));
+  action = new QAction( "RGGB", _bayerPopup);
+  bayerMapper->setMapping( action, 7);
+  _bayerPopup->addAction( action);
+  connect( action, SIGNAL( triggered()), bayerMapper, SLOT( map()));
+  action = new QAction( "GBRG", _bayerPopup);
+  bayerMapper->setMapping( action, 8);
+  _bayerPopup->addAction( action);
+  connect( action, SIGNAL( triggered()), bayerMapper, SLOT( map()));
   if( _camera->colorCoding() == "MONO")
   {
-    _bayerPopup->insertSeparator(9);
-    _bayerPopup->insertItem( "Equalizer", 10);
-    _bayerPopup->insertSeparator(11);
-    _bayerPopup->insertItem( "Show Overexposure", 12);
-    _bayerPopup->insertItem( "Hide Overexposure", 13);
+    _bayerPopup->addSeparator();
+    action = new QAction( "Equalizer", _bayerPopup);
+    bayerMapper->setMapping( action, 10);
+    _bayerPopup->addAction( action);
+    connect( action, SIGNAL( triggered()), bayerMapper, SLOT( map()));
+    _bayerPopup->addSeparator();
+    action = new QAction( "Show Overexposure", _bayerPopup);
+    bayerMapper->setMapping( action, 12);
+    _bayerPopup->addAction( action);
+    connect( action, SIGNAL( triggered()), bayerMapper, SLOT( map()));
+    action = new QAction( "Hide Overexposure", _bayerPopup);
+    bayerMapper->setMapping( action, 13);
+    _bayerPopup->addAction( action);
+    connect( action, SIGNAL( triggered()), bayerMapper, SLOT( map()));
   }
     
-  connect( _bayerPopup, SIGNAL( activated( int)),
+  connect( bayerMapper, SIGNAL( mapped( int)),
            this, SLOT( setBayerMode( int)));
 }
 
@@ -181,7 +213,7 @@ libqlmbcam::QlmbCamVideoWidget::~QlmbCamVideoWidget()
 void
 libqlmbcam::QlmbCamVideoWidget::startUpdate()
 {
-  if( !_updateThread.running())
+  if( !_updateThread.isRunning())
   {
     _doUpdate = true;
     _updateThread.start();
@@ -196,7 +228,7 @@ libqlmbcam::QlmbCamVideoWidget::startUpdate()
 void
 libqlmbcam::QlmbCamVideoWidget::stopUpdate()
 {
-  if( _updateThread.running())
+  if( _updateThread.isRunning())
   {
     _doUpdate = false;
     _updateThread.wait();
@@ -232,8 +264,8 @@ libqlmbcam::QlmbCamVideoWidget::saveCurrentImage( const QString& filename)
   {
     if( !filename.endsWith( ".pgm"))
     {
-      int dot = filename.findRev( ".");
-      int slash = filename.findRev( "/");
+      int dot = filename.lastIndexOf( ".");
+      int slash = filename.lastIndexOf( "/");
       if( slash < dot)
       {
         filenameCopy = filenameCopy.left( dot);
@@ -258,7 +290,7 @@ libqlmbcam::QlmbCamVideoWidget::saveCurrentImage( const QString& filename)
       }
     }
         
-    std::ofstream file( filenameCopy.latin1());
+    std::ofstream file( filenameCopy.toLatin1().data());
     file << "P5" << std::endl
          << width << " " << height << " 255" << std::endl;
     
@@ -279,15 +311,8 @@ libqlmbcam::QlmbCamVideoWidget::saveCurrentImage( const QString& filename)
  *  TEMPORARY CODE END
  *-------------------------------------------------------------------------*/
   
-  QImage image( width, height, 32);
-  QString format = filename.right( 3).upper();
-  QStringList list = image.outputFormatList();
-  QStringList::Iterator it = list.begin();
-  while( it != list.end() )
-  {
-    std::cout << *it << std::endl;
-    ++it;
-  }
+  QImage image( width, height, QImage::Format_ARGB32);
+  QString format = filename.right( 3).toUpper();
    
   if( colorcoding == "YUV411")
   {
@@ -347,7 +372,7 @@ libqlmbcam::QlmbCamVideoWidget::saveCurrentImage( const QString& filename)
     return;
   }
 
-  image.save( filename, format.latin1());
+  image.save( filename, format.toLatin1());
 }
 
 
@@ -394,12 +419,20 @@ libqlmbcam::QlmbCamVideoWidget::setBayerMode( int id)
   {
     if( _equalizer == 0)
     {
-      _equalizer = new QHBox( 0, "equalizer", Qt::WDestructiveClose);
-      _equalizer->setCaption( "Equalizer");
+      _equalizer = new QWidget;
+      _equalizer->setAttribute(Qt::WA_DeleteOnClose) ;
+      _equalizer->setWindowTitle( "Equalizer");
+      QHBoxLayout* eqLayout = new QHBoxLayout( _equalizer);
       QPushButton* lambdaReset = new QPushButton( "Reset", _equalizer);
-      _lambdaSlider = new QSlider( -1000, 1000, 10, 0, Qt::Horizontal,
-                                   _equalizer);
+      eqLayout->addWidget( lambdaReset);
+      _lambdaSlider = new QSlider( Qt::Horizontal, _equalizer);
+      _lambdaSlider->setMinimum( -1000);
+      _lambdaSlider->setMaximum( 1000);
+      _lambdaSlider->setPageStep( 10);
+      _lambdaSlider->setValue( 0);
+      eqLayout->addWidget( _lambdaSlider);
       QLCDNumber* lambdaDisplay = new QLCDNumber( 5, _equalizer);
+      eqLayout->addWidget( lambdaDisplay);
       connect( _lambdaSlider, SIGNAL( valueChanged( int)),
                lambdaDisplay, SLOT( display( int)));
       connect( _lambdaSlider, SIGNAL( valueChanged( int)),
@@ -409,12 +442,13 @@ libqlmbcam::QlmbCamVideoWidget::setBayerMode( int id)
                this, SLOT( resetLambda()));
       connect( _equalizer, SIGNAL( destroyed()),
                this, SLOT( resetEqualizerWidget()));
+      _equalizer->setLayout( eqLayout);
       _equalizer->show();
       break;
     }
     else
     {
-      _equalizer->setActiveWindow();
+      _equalizer->activateWindow();
       _equalizer->setFocus();
     }
   }
@@ -478,7 +512,7 @@ libqlmbcam::QlmbCamVideoWidget::closeEvent( QCloseEvent* e)
   stopUpdate();
   emit( aboutToClose());
   
-  QScrollView::closeEvent( e);
+  QScrollArea::closeEvent( e);
 }
 
 /*=========================================================================
@@ -515,7 +549,7 @@ void
 libqlmbcam::QlmbCamVideoWidget::focusInEvent( QFocusEvent* e)
 {
   emit( focused( _camera->guid().c_str()));
-  QScrollView::focusInEvent( e);
+  QScrollArea::focusInEvent( e);
 }
 
 /*=========================================================================

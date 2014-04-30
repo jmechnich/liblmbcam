@@ -26,9 +26,9 @@ inline
 void
 QlmbCamParamControlWidget::changeParamValue( int value)
 {
-  QString parameter = sender()->name();
+  QString parameter = sender()->objectName();
   
-  p_camera->param( parameter.latin1())->setValue( value);
+  p_camera->param( parameter.toLatin1().data())->setValue( value);
 }
 
 /*=========================================================================
@@ -39,8 +39,8 @@ inline
 void
 QlmbCamParamControlWidget::changeAutoMode( bool autoMode)
 {
-  QString parameter = sender()->name();
+  QString parameter = sender()->objectName();
 
-  p_camera->param( parameter.latin1())->setValue( autoMode ? 1 : 0);
+  p_camera->param( parameter.toLatin1().data())->setValue( autoMode ? 1 : 0);
 }
 

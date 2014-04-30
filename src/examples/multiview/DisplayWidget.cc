@@ -28,8 +28,8 @@
 **
 **************************************************************************/
 
-#include <qapplication.h>
-#include <qcursor.h>
+#include <QApplication>
+#include <QCursor>
 
 #include "DisplayWidget.hh"
 
@@ -52,7 +52,7 @@ RGB16_RGBConverter DisplayWidget::RGB16Conv;
  *=======================================================================*/
 DisplayWidget::
 DisplayWidget(LMBCam* camera, QWidget* parent)
-        :QScrollView(parent, "displaywidget", Qt::WRepaintNoErase), 
+        :QScrollArea(parent), 
          p_camera( camera), 
          p_currentFrame( -1),
          p_freeze( false), 
@@ -67,13 +67,13 @@ DisplayWidget(LMBCam* camera, QWidget* parent)
     /*---------------------------------------------------------------------
      *  Initialize FID widget
      *---------------------------------------------------------------------*/
-    p_fidWidget = new FastImageDisplayWid( viewport(), "fidwid", Qt::WRepaintNoErase | Qt::WResizeNoErase);
+    p_fidWidget = new FastImageDisplayWid( viewport());
     p_fidWidget->setImageSize( p_camera->width(),
                                p_camera->height());
 
 //    setResizePolicy(QScrollView::AutoOne);
     
-    addChild(p_fidWidget);
+    setWidget(p_fidWidget);
     
     /*---------------------------------------------------------------------
      *  Start camera

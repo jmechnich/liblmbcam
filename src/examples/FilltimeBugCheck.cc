@@ -43,14 +43,14 @@
 **
 **************************************************************************/
 
-#include <FireCamBus.hh>
-#include <LMBCam.hh>
+#include <LMBCamBusIndex.hh>
 #include <LMBCamParam.hh>
-#include <FireCam.hh>
 #include <LMBError.hh>
 #include <LMBErrorHandler.hh>
 
 #include <iomanip>
+#include <cstdlib>
+#include <sys/time.h>
 
 using namespace liblmbcam;
 using namespace std;
@@ -69,7 +69,7 @@ int main( int argc, char** argv)
      *---------------------------------------------------------------------*/
     std::cout << "Creating bus...";
     
-    FireCamBus bus;
+    LMBCamBusIndex bus;
 
     std::cout << "ok" << std::endl << std::endl;
     

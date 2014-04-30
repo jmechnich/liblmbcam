@@ -30,22 +30,59 @@
 #include <string>
 #include <map>
 
-#include <LMBCam.hh>
+#include <LMBCamBus.hh>
 
 namespace liblmbcam
 {
-  class LMBCamBus;
-  
-  class LMBCamBusIndex
+  class LMBCamBusIndex : public LMBCamBus
   {
   public:
-    LMBCamBusIndex();
-    ~LMBCamBusIndex();
-    LMBCam* findCamera( const std::string& guid) const;
-    LMBCam* getFirstCamera() const;
+    enum BusType
+    {
+        None=0x0,
+        FireCam=0x1,
+        V4LCam=0x2,
+        All=0x3
+    };
     
+    LMBCamBusIndex( BusType type=All);
+    ~LMBCamBusIndex();
+
+/*======================================================================*/
+/*! 
+ *   This function should return the number of cameras attached to the bus
+ *
+ *   \return number of cameras
+ */
+/*======================================================================*/
+    unsigned int nCameras() const;
+
+/*======================================================================*/
+/*! 
+ *   This function should return a pointer to camera <em>index</em>
+ *
+ *   \param index  camera index
+ *   \exception throws LMBCamBusError_OutOfBounds camera <em>index</em>
+ *              does not exist
+ *   \return pointer to camera <em>index</em>
+ */
+/*======================================================================*/
+    LMBCam* cameraByIndex( unsigned int index) const;
+
+/*======================================================================*/
+/*! 
+ *   This function should return a pointer to the camera
+ *   with GUID <em>guid</em>.
+ *
+ *   \param guid camera GUID
+ *   \return pointer to camera with GUID <em>guid</em>
+ */
+/*======================================================================*/
+    LMBCam* cameraByGUID( const std::string& guid) const;
+
   private:
     std::map<std::string,LMBCamBus*> _busses;
+    BusType _type;
   };
 }
 

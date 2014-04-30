@@ -37,18 +37,19 @@
 
 #include <map>
 
-#include <qlistview.h>
-#include <qstring.h>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+#include <QString>
 
 #include <LMBCamBus.hh>
 
 namespace libqlmbcam
 {
-  class QlmbCamBusWidget : public QListView
+  class QlmbCamBusWidget : public QTreeWidget
   {
     Q_OBJECT
   public:
-    QlmbCamBusWidget( QWidget* parent=0, const char* name=0, WFlags f=0);
+    QlmbCamBusWidget( QWidget* parent=0);
 
     virtual ~QlmbCamBusWidget();
   public slots:
@@ -60,11 +61,11 @@ namespace libqlmbcam
     void cameraSelectionChanged( liblmbcam::LMBCam*);
 
   protected slots:
-    void changeSelectedCamera( QListViewItem* li);
+    void changeSelectedCamera();
     
   protected:
     std::map<QString,liblmbcam::LMBCamBus*> _busses;
-    QListViewItem* _variousRoot;
+    QTreeWidgetItem* _variousRoot;
   };
 }
 

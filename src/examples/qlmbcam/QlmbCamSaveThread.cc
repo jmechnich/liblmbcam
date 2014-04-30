@@ -33,7 +33,7 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
-#include <qapplication.h>
+#include <QApplication>
 #include <assert.h>
 
 /*=========================================================================
@@ -92,7 +92,7 @@ libqlmbcam::QlmbCamSaveThread::saveAsPGM()
         std::stringstream ext_length;
         ext_length << _grab_numberFrames;
       
-        filename2 << _filename << "_";
+        filename2 << _filename.toLatin1().data() << "_";
         filename2.width(ext_length.str().length());
         filename2.fill('0');
         filename2 << actual_frame;
@@ -141,7 +141,7 @@ libqlmbcam::QlmbCamSaveThread::saveAsTIFF()
     unsigned char* current_image = 0;
 
     std::string file_extension = "tif";
-    std::string filename = _filename;
+    std::string filename = _filename.toLatin1().data();
     TIFF *tiff = TIFFOpen(filename.append(".").append(file_extension).c_str(),"w");
 
     if (tiff)

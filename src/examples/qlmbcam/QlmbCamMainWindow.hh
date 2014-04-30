@@ -41,14 +41,15 @@
 #ifndef QLMBCAMMAINWINDOW_HH
 #define QLMBCAMMAINWINDOW_HH
 
-#include <qwidget.h>
-#include <qpushbutton.h>
+#include <QWidget>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QLCDNumber>
+#include <QProgressDialog> 
+
 #include <QlmbCamBusWidget.hh>
 #include <QlmbCamWidget.hh>
 #include <QlmbCamVideoWidget.hh>
-#include <qspinbox.h>
-#include <qlcdnumber.h>
-#include <qprogressdialog.h> 
 
 #include <LMBCam.hh>
 
@@ -66,7 +67,7 @@ class QlmbCamMainWindow : public QWidget
   Q_OBJECT
 
 public:
-  QlmbCamMainWindow( QWidget* parent=0, const char* name=0, WFlags f=0);
+  QlmbCamMainWindow( QWidget* parent=0);
   ~QlmbCamMainWindow();
 
 private slots:
@@ -82,7 +83,7 @@ private slots:
   
 protected :
 
-  void customEvent(QCustomEvent* cevent);
+  bool event(QEvent* cevent);
   void closeEvent(QCloseEvent* e);
   
 private:

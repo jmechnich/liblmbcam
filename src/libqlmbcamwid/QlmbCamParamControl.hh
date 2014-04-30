@@ -27,9 +27,9 @@
 #ifndef QLMBCAMPARAMCONTROL_HH
 #define QLMBCAMPARAMCONTROL_HH
 
-#include <qgrid.h>
-#include <qcheckbox.h>
-#include <qstring.h>
+#include <QGridLayout>
+#include <QCheckBox>
+#include <QString>
 
 #include <LMBCam.hh>
 #include <LMBCamParam.hh>
@@ -40,7 +40,7 @@ using namespace liblmbcam;
 
 class QSlider;
 
-class QlmbCamParamControlWidget : public QGrid
+class QlmbCamParamControlWidget : public QWidget
 {
   Q_OBJECT
   
@@ -62,9 +62,11 @@ private:
   
   LMBCam* p_camera;
 
+  size_t p_ncols;
+  QGridLayout* p_grid;
+  
   std::vector<QSlider*> p_sliders;
   std::vector<QCheckBox*> p_autoBoxes;
-  
 };
 
 #include "QlmbCamParamControl.icc"

@@ -57,10 +57,9 @@
 **
 **************************************************************************/
 
-#include <qapplication.h>
-#include <qstatusbar.h>
-#include <qpopupmenu.h>
-#include <qmenubar.h>
+#include <QApplication>
+#include <QStatusBar>
+#include <QMenuBar>
 
 #include <string>
 #include <sstream>
@@ -103,9 +102,9 @@ QlmbCamMainWidget::QlmbCamMainWidget( LMBCam* camera, QWidget* parent)
                                p_camera->height());
     (void) menuBar();
     
-    QPopupMenu *file = new QPopupMenu( this );
-    file->insertItem( "&Close",  this, SLOT( close()), CTRL+Key_C );
-    menuBar()->insertItem( "&File", file );
+    QMenu *file = new QMenu( "&File", this );
+    file->addAction( "&Close",  this, SLOT( close()), Qt::CTRL+Qt::Key_C );
+    menuBar()->addMenu( file );
 
     (void) statusBar();
     setCentralWidget( p_fidWidget);
@@ -113,9 +112,11 @@ QlmbCamMainWidget::QlmbCamMainWidget( LMBCam* camera, QWidget* parent)
     /*---------------------------------------------------------------------
      *  create control widget
      *---------------------------------------------------------------------*/
-    p_controls = new QHBox( 0, "", Qt::WStyle_StaysOnTop);
+    p_controls = new QWidget( 0, Qt::WindowStaysOnTopHint);
+    QHBoxLayout* controlLayout = new QHBoxLayout;
     p_modeControl =
         new QlmbCamModeControlWidget( camera, p_controls);
+    controlLayout->addWidget( p_modeControl);
     connect( p_modeControl, SIGNAL( videoModeChanged( const QString&)),
              this, SLOT( changeVideoMode( const QString&)));
     connect( p_modeControl, SIGNAL( framerateChanged( double)),
@@ -127,15 +128,17 @@ QlmbCamMainWidget::QlmbCamMainWidget( LMBCam* camera, QWidget* parent)
     
     QLabel* label = new QLabel( p_controls);
     label->setFrameStyle( QFrame::VLine | QFrame::Plain);
+    controlLayout->addWidget( label);
     
-    new QlmbCamParamControlWidget( camera, p_controls);
-
+    controlLayout->addWidget( new QlmbCamParamControlWidget( camera, p_controls));
+    p_controls->setLayout( controlLayout);
+    
     /*---------------------------------------------------------------------
      *  make menu to show controls
      *---------------------------------------------------------------------*/
-    QPopupMenu *edit = new QPopupMenu( this );
-    edit->insertItem( "&Settings...",  p_controls, SLOT( show()), CTRL+Key_S );
-    menuBar()->insertItem( "&Edit", edit );
+    QMenu *edit = new QMenu( "&Edit", this );
+    edit->addAction( "&Settings...",  p_controls, SLOT( show()), Qt::CTRL+Qt::Key_S );
+    menuBar()->addMenu( edit );
 
     /*---------------------------------------------------------------------
      *  Start camera
@@ -164,43 +167,43 @@ QlmbCamMainWidget::keyPressEvent( QKeyEvent* e)
 {
   switch( e->key())
   {
-  case Key_Q:
+  case Qt::Key_Q:
     close();
     break;
-  case Key_0:
+  case Qt::Key_0:
     p_freeze = !p_freeze;
     break;
-  case Key_1:
+  case Qt::Key_1:
     p_camera->setFramerate( 1.875, true);
     p_camera->restartCamera();
     p_currentFrame = -1;
     break;
-  case Key_2:
+  case Qt::Key_2:
     p_camera->setFramerate( 3.75, true);
     p_camera->restartCamera();
     p_currentFrame = -1;
     break;
-  case Key_3:
+  case Qt::Key_3:
     p_camera->setFramerate( 7.5, true);
     p_camera->restartCamera();
     p_currentFrame = -1;
     break;
-  case Key_4:
+  case Qt::Key_4:
     p_camera->setFramerate( 15, true);
     p_camera->restartCamera();
     p_currentFrame = -1;
     break;
-  case Key_5: 
+  case Qt::Key_5: 
     p_camera->setFramerate( 30, true);
     p_camera->restartCamera();
     p_currentFrame = -1;
     break;
-  case Key_6: 
+  case Qt::Key_6: 
     p_camera->setFramerate( 60, true);
     p_camera->restartCamera();
     p_currentFrame = -1;
     break;
-  case Key_M:
+  case Qt::Key_M:
   {
     std::cout << "AVAILABLE MODES:" << std::endl;
     std::cout << "================" << std::endl;
@@ -213,7 +216,7 @@ QlmbCamMainWidget::keyPressEvent( QKeyEvent* e)
     std::cout << std::endl;
     break;
   }
-  case Key_P:
+  case Qt::Key_P:
   {
     std::cout << "AVAILABLE PARAMETERS:" << std::endl;
     std::cout << "=====================" << std::endl;
@@ -231,7 +234,7 @@ QlmbCamMainWidget::keyPressEvent( QKeyEvent* e)
     std::cout << std::endl;
     break;
   }
-  case Key_I:
+  case Qt::Key_I:
     std::cout << "GENERAL INFORMATION:" << std::endl;
     std::cout << "====================" << std::endl;
     std::cout << "Vendor: " << p_camera->vendor() << std::endl;
@@ -239,7 +242,7 @@ QlmbCamMainWidget::keyPressEvent( QKeyEvent* e)
     std::cout << "GUID  : " << p_camera->guid() << std::endl;            
     std::cout << std::endl;
     break;
-  case Key_Question:
+  case Qt::Key_Question:
     std::cout << "HELP:\n"
               << "=====\n"
               << "Key  Description\n\n"
@@ -278,55 +281,55 @@ QlmbCamMainWidget::keyPressEvent( QKeyEvent* e)
               << "u    increase white balance V by 10\n"
               << "j    decrease white balance V by 10\n\n";
     break;
-  case Key_W:
+  case Qt::Key_W:
     parameterIncrease( "brightness", 10);
     break;
-  case Key_S:
+  case Qt::Key_S:
     parameterDecrease( "brightness", 10);
     break;
-  case Key_X:
+  case Qt::Key_X:
     parameterSwitchAuto( "brightness_auto");
     break;
-  case Key_E:
+  case Qt::Key_E:
     parameterIncrease( "exposure", 10);
     break;
-  case Key_D:
+  case Qt::Key_D:
     parameterDecrease( "exposure", 10);
     break;
-  case Key_C:
+  case Qt::Key_C:
     parameterSwitchAuto( "exposure_auto");
     break;
-  case Key_R:
+  case Qt::Key_R:
     parameterIncrease( "gain", 10);
     break;
-  case Key_F:
+  case Qt::Key_F:
     parameterDecrease( "gain", 10);
     break;
-  case Key_V:
+  case Qt::Key_V:
     parameterSwitchAuto( "gain_auto");
     break;
-  case Key_T:
+  case Qt::Key_T:
     parameterIncrease( "shutter", 10);
     break;
-  case Key_G:
+  case Qt::Key_G:
     parameterDecrease( "shutter", 10);
     break;
-  case Key_B:
+  case Qt::Key_B:
     parameterSwitchAuto( "shutter_auto");
     break;
-  case Key_Z:
+  case Qt::Key_Z:
     parameterIncrease( "white_balance_u", 1);
     break;
-  case Key_H:
+  case Qt::Key_H:
     parameterDecrease( "white_balance_u", 1);
     break;
-  case Key_N:
+  case Qt::Key_N:
     parameterSwitchAuto( "white_balance_auto");
     break;
-  case Key_U:
+  case Qt::Key_U:
     parameterIncrease( "white_balance_v", 1);
     break;
-  case Key_J:
+  case Qt::Key_J:
     parameterDecrease( "white_balance_v", 1);
     break;
   default:
@@ -414,7 +417,7 @@ QlmbCamMainWidget::updateImage()
       {
         std::stringstream msg;
         msg << "FPS: " << (float)p_frames / elapsed_time;
-        statusBar()->message( msg.str().c_str());
+        statusBar()->showMessage( msg.str().c_str());
         p_frames = 0;
         p_start_time = clock();
       }

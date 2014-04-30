@@ -33,9 +33,9 @@
 
 #include "QlmbCamParamControl.hh"
 
-#include <qlabel.h>
-#include <qhbox.h>
-#include <qslider.h>
+#include <QLabel>
+#include <QHBoxLayout>
+#include <QSlider>
 
 #include <map>
 #include <string>
@@ -46,7 +46,8 @@
  *=======================================================================*/
 QlmbCamParamControlWidget::QlmbCamParamControlWidget( LMBCam* camera,
                                                       QWidget* parent)
-        :QGrid( 3, parent), p_camera( camera)
+        : QWidget( parent), p_camera( camera), p_ncols( 3)
+        , p_grid( new QGridLayout( this))
 {
   /*-----------------------------------------------------------------------
    *  Get paramter map from camera and create widgets according to GUIHints
@@ -79,10 +80,10 @@ QlmbCamParamControlWidget::QlmbCamParamControlWidget( LMBCam* camera,
     for( std::vector<QCheckBox*>::const_iterator boxIt = p_autoBoxes.begin();
          boxIt != p_autoBoxes.end(); ++boxIt)
     {
-      QString paramName( (*boxIt)->name());
+      QString paramName( (*boxIt)->objectName());
       paramName.truncate( paramName.length() - 5);
       
-      if( QString( (*sliderIt)->name()).startsWith( paramName))
+      if( QString( (*sliderIt)->objectName()).startsWith( paramName))
       {
         (*sliderIt)->setDisabled( (*boxIt)->isChecked());
         connect( (*boxIt), SIGNAL( toggled( bool)),
@@ -90,6 +91,7 @@ QlmbCamParamControlWidget::QlmbCamParamControlWidget( LMBCam* camera,
       }
     }
   }
+  setLayout( p_grid);
 }
 
 /*=========================================================================
@@ -104,17 +106,20 @@ QlmbCamParamControlWidget::createSlider( const QString& name,
   /*-----------------------------------------------------------------------
    *  Create three widgets, as long as the parent grid has three rows
    *-----------------------------------------------------------------------*/
-  new QLabel( name, parent);
-  QSlider* slider = new QSlider( param->minValueAsInt(),
-                                 param->maxValueAsInt(),
-                                 10,
-                                 param->asInt(),
-                                 Qt::Horizontal,
-                                 parent,
-                                 name.latin1());
+  size_t row = p_grid->rowCount();
+  p_grid->addWidget( new QLabel( name, parent), row, 0);
+  QSlider* slider = new QSlider( Qt::Horizontal, parent);
+  slider->setMinimum( param->minValueAsInt());
+  slider->setMaximum( param->maxValueAsInt());
+  slider->setPageStep( 10);
+  slider->setValue( param->asInt());
+  slider->setObjectName( name);
+  
+  p_grid->addWidget( slider, row, 1);
+  QLabel* label = new QLabel( QString::number( param->asInt()), parent);
+  p_grid->addWidget( label, row, 2);
   connect( slider, SIGNAL( valueChanged(int)),
-           new QLabel( QString::number( param->asInt()), this),
-           SLOT( setNum(int)));
+           label, SLOT( setNum(int)));
   connect( slider, SIGNAL( valueChanged(int)),
            this, SLOT( changeParamValue(int)));
 
@@ -136,10 +141,13 @@ QlmbCamParamControlWidget::createCheckBox( const QString& name,
   /*-----------------------------------------------------------------------
    *  Create three widgets, as long as the parent grid has three rows
    *-----------------------------------------------------------------------*/
-  new QLabel( name, parent);
-  QCheckBox* checkbox = new QCheckBox( parent, name.latin1());
+  size_t row = p_grid->rowCount();
+  p_grid->addWidget( new QLabel( name, parent), row, 0);
+  QCheckBox* checkbox = new QCheckBox( parent);
+  checkbox->setObjectName( name);
   checkbox->setChecked( param->asInt());
-  new QLabel( parent);
+  p_grid->addWidget( checkbox, row, 1);
+  p_grid->addWidget( new QLabel( parent), row, 2);
 
   if( name.endsWith( "auto"))
   {

@@ -70,11 +70,11 @@
 #ifndef QLMBCAMVIDEOWIDGET_HH
 #define QLMBCAMVIDEOWIDGET_HH
 
-#include <qscrollview.h>
-#include <qpopupmenu.h>
-#include <qhbox.h>
-#include <qslider.h>
-#include <qevent.h>
+#include <QScrollArea>
+#include <QMenu>
+#include <QHBoxLayout>
+#include <QSlider>
+#include <QEvent>
 
 #include <FastImageDisplayWid_Templ.hh>
 #include <X11FidWidget.hh>
@@ -110,12 +110,12 @@ namespace libqlmbcam
  *  to send progress informations about the copying to memory 
  */
 /*======================================================================*/
-  class SavetoMemEvent : public QCustomEvent
+  class SavetoMemEvent : public QEvent
   {
 
   public:
     SavetoMemEvent(unsigned int actual_frame, unsigned int nFrames)
-            : QCustomEvent(save_to_mem),
+            : QEvent(Type(save_to_mem)),
               _actual_frame(actual_frame), _nFrames(nFrames)
           {}
 
@@ -141,7 +141,7 @@ namespace libqlmbcam
  *  to pass the buffer (containing the images) onward
  */
 /*======================================================================*/
-  class BufferFullEvent : public QCustomEvent
+  class BufferFullEvent : public QEvent
   {
   public:
     BufferFullEvent( unsigned char* buffer,
@@ -150,7 +150,7 @@ namespace libqlmbcam
                      unsigned int width,
                      unsigned int height,
                      const std::string& colorCoding)
-            :QCustomEvent( buffer_full ), _buffer( buffer),
+            :QEvent( Type(buffer_full) ), _buffer( buffer),
              _frameSize( frameSize), _nFrames( nFrames),
              _width( width), _height( height), _colorCoding( colorCoding)
           {}
@@ -195,13 +195,12 @@ namespace libqlmbcam
     
   };
   
-  class QlmbCamVideoWidget : public QScrollView
+  class QlmbCamVideoWidget : public QScrollArea
   {
     Q_OBJECT
 
   public:
-    QlmbCamVideoWidget( liblmbcam::LMBCam* camera,
-                        QWidget* parent=0, const char* name=0, WFlags f=0);
+    QlmbCamVideoWidget( liblmbcam::LMBCam* camera, QWidget* parent=0);
     ~QlmbCamVideoWidget();
     
     void updateImage();
@@ -251,12 +250,12 @@ namespace libqlmbcam
     int _lambda;
     
 
-    QHBox* _equalizer;
+    QWidget* _equalizer;
     QSlider* _lambdaSlider;
     QObject* _recv;
     bool _showOverExposure;
         
-    QPopupMenu* _bayerPopup;
+    QMenu* _bayerPopup;
     
     static YUV411_RGBConverter _YUV411Conv;
     static YUV422_RGBConverter _YUV422Conv;
@@ -272,8 +271,6 @@ namespace libqlmbcam
     bool _fs;
     QSize _wsize;
     QPoint _wpos;
-    QWidget* _parent;
-    WFlags _wflags;
   };
 }
 

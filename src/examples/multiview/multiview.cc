@@ -26,24 +26,25 @@
  **
  **
  **************************************************************************/#
-
-#include <qapplication.h>
-
-#include <iostream>
-#include <vector>
-
-#include <FireCamBus.hh>
+ 
+#include <QApplication>
+ 
+#include <LMBCamBusIndex.hh>
+ 
+#include "DisplayWidget.hh"
+ 
 #include <LMBError.hh>
 #include <LMBErrorHandler.hh>
-#include "DisplayWidget.hh"
-
- int main(int argc, char** argv)
+#include <iostream>
+#include <vector>
+ 
+int main(int argc, char** argv)
 {
   liblmbcam::LMBErrorHandler::ErrorHandler()->setMode(liblmbcam::LMBErrorHandler::THROW);
 
   try
   {
-    liblmbcam::FireCamBus bus;
+    liblmbcam::LMBCamBusIndex bus;
 
     if (bus.nCameras()!=0)
     {

@@ -46,13 +46,12 @@
 
 #include "QlmbCamBusWidget.hh"
 
-#include <qapplication.h>
-#include <qlayout.h>
-#include <qpushbutton.h>
-#include <qmessagebox.h>
+#include <QApplication>
+#include <QLayout>
+#include <QPushButton>
+#include <QMessageBox>
 
-#include <FireCamBus.hh>
-// #include <V4LCamBus.hh>
+#include <LMBCamBusIndex.hh>
 #include <LMBError.hh>
 #include <LMBCam.hh>
 
@@ -60,19 +59,19 @@
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
  *=======================================================================*/
-libqlmbcam::QlmbCamBusWidget::QlmbCamBusWidget( QWidget* parent,
-                                               const char* name,
-                                               WFlags f)
-        :QListView( parent, name, f), _variousRoot( 0)
+libqlmbcam::QlmbCamBusWidget::QlmbCamBusWidget( QWidget* parent)
+        :QTreeWidget( parent), _variousRoot( 0)
 {
-  addColumn( "Camera Overview");
-  addColumn( "Vendor");
-  addColumn( "Model");
-  addColumn( "Node ID");
+  setColumnCount( 4);
+  QTreeWidgetItem* header = headerItem();
+  header->setText( 0, "Camera Overview");
+  header->setText( 1, "Vendor");
+  header->setText( 2, "Model");
+  header->setText( 3, "Node ID");
   setRootIsDecorated( true);
   setAllColumnsShowFocus( true);
-  connect( this, SIGNAL( selectionChanged( QListViewItem*)),
-           this, SLOT( changeSelectedCamera( QListViewItem*)));
+  connect( this, SIGNAL( itemSelectionChanged()),
+           this, SLOT( changeSelectedCamera()));
 }
 
 /*=========================================================================
@@ -101,61 +100,51 @@ libqlmbcam::QlmbCamBusWidget::rescan()
   /*-----------------------------------------------------------------------
    *  Scan for ieee1394 busses
    *-----------------------------------------------------------------------*/
-  QListViewItem* ieee1394root = new QListViewItem( this, "FireCamBus");
-  ieee1394root->setOpen( true);
-  ieee1394root->setSelectable( false);
+  QTreeWidgetItem* ieee1394root = new QTreeWidgetItem( this);
+  ieee1394root->setText( 0, "FireCamBus");
+  ieee1394root->setExpanded( true);
+  Qt::ItemFlags flags = ieee1394root->flags();
+  flags &= ~Qt::ItemIsSelectable;
+  ieee1394root->setFlags( flags);
   
 //   QListViewItem* v4lroot = new QListViewItem( this, "V4LCamBus");
 //   v4lroot->setOpen( true);
 //   v4lroot->setSelectable( false);
   
+  // int errorhandlerMode = liblmbcam::LMBErrorHandler::ErrorHandler()->mode();
+  // liblmbcam::LMBErrorHandler::ErrorHandler()->setMode(
+  //     liblmbcam::LMBErrorHandler::THROW);
+  
   try
   {
-    QListViewItem* tmp = 0;
+    QString busName( "FireCamBus");
+    _busses[busName] = new liblmbcam::LMBCamBusIndex(
+        liblmbcam::LMBCamBusIndex::FireCam);
     liblmbcam::LMBCam* tmpCamera = 0;
-    
-    int errorhandlerMode = liblmbcam::LMBErrorHandler::ErrorHandler()->mode();
-    liblmbcam::LMBErrorHandler::ErrorHandler()->setMode(
-        liblmbcam::LMBErrorHandler::THROW);
-    
-    try
+    for( unsigned int i=0; i < _busses[busName]->nCameras(); ++i)
     {
-      for( unsigned int busIndex=0; busIndex < 8; ++busIndex)
-      {
-        QString busName( "FireCamBus");
-        busName += QString::number( busIndex);
-        _busses[busName.latin1()] = new liblmbcam::FireCamBus( busIndex);
-        tmp = new QListViewItem( ieee1394root, QString::number( busIndex));
-        tmp->setSelectable( false);
-        for( unsigned int i=0; i < _busses[busName.latin1()]->nCameras(); ++i)
-        {
-          tmpCamera = _busses[busName.latin1()]->cameraByIndex( i);
-          new QListViewItem( tmp, "FireCam"+QString::number(i),
-                             tmpCamera->vendor().c_str(),
-                             tmpCamera->model().c_str(),
-                             tmpCamera->guid().c_str());
-        }
-        
-        if( tmp->firstChild() != 0)
-        {
-          tmp->setOpen( true);
-        }
-      }
+      tmpCamera = _busses[busName]->cameraByIndex( i);
+      QTreeWidgetItem* tmpCameraItem = new QTreeWidgetItem( ieee1394root);
+      tmpCameraItem->setText( 0, "FireCam"+QString::number(i));
+      tmpCameraItem->setText( 1, tmpCamera->vendor().c_str());
+      tmpCameraItem->setText( 2, tmpCamera->model().c_str());
+      tmpCameraItem->setText( 3, tmpCamera->guid().c_str());
     }
-    catch(...)
-    {}
-
-    liblmbcam::LMBErrorHandler::ErrorHandler()->setMode( errorhandlerMode);
+    
+    if( ieee1394root->child(0) != 0)
+    {
+      ieee1394root->setExpanded( true);
+    }
     
 //     try
 //     {
 //       _busses["V4LCamBus0"] = new liblmbcam::V4LCamBus;
-//       tmp = new QListViewItem( v4lroot, "0");
+//       tmp = new QTreeWidgetItem( v4lroot, "0");
 //       tmp->setSelectable( false);
 //       for( unsigned int i=0; i < _busses["V4LCamBus0"]->nCameras(); ++i)
 //       {
 //         tmpCamera = _busses["V4LCamBus0"]->cameraByIndex( i);
-//         new QListViewItem( tmp, "V4LCam"+QString::number(i),
+//         new QTreeWidgetItem( tmp, "V4LCam"+QString::number(i),
 //                            tmpCamera->vendor().c_str(),
 //                            tmpCamera->model().c_str(),
 //                            tmpCamera->guid().c_str());
@@ -192,12 +181,14 @@ libqlmbcam::QlmbCamBusWidget::rescan()
  *  ==> see headerfile
  *=======================================================================*/
 void
-libqlmbcam::QlmbCamBusWidget::changeSelectedCamera( QListViewItem* li)
+libqlmbcam::QlmbCamBusWidget::changeSelectedCamera()
 {
-  QListViewItem* busIndexItem = li->parent();
-  QListViewItem* busItem = busIndexItem->parent();
-  liblmbcam::LMBCamBus* bus = _busses[busItem->text(0)+busIndexItem->text(0)];
-  liblmbcam::LMBCam* cam = bus->cameraByGUID( li->text(3).latin1());
+  QList<QTreeWidgetItem*> selection = selectedItems();
+  if( selection.size() == 0) return;
+  QTreeWidgetItem* li = selection[0];
+  QTreeWidgetItem* busIndexItem = li->parent();
+  liblmbcam::LMBCamBus* bus = _busses[busIndexItem->text(0)];
+  liblmbcam::LMBCam* cam = bus->cameraByGUID( li->text(3).toLatin1().data());
   emit( cameraSelectionChanged( cam));
 }
 
@@ -209,14 +200,14 @@ libqlmbcam::QlmbCamBusWidget::changeSelectedCamera( QListViewItem* li)
 void
 libqlmbcam::QlmbCamBusWidget::changeSelectedCamera( const QString& guid)
 {
-  QListViewItemIterator it( this);
-  while( it.current())
+  QTreeWidgetItemIterator it( this);
+  while( *it)
   {
-    if( it.current()->text( 3) == guid)
+    if( (*it)->text( 3) == guid)
     {
-      if( !isSelected( it.current()))
+      if( !(*it)->isSelected())
       {
-        setSelected( it.current(), true);
+        (*it)->setSelected( true);
       }
           
       return;

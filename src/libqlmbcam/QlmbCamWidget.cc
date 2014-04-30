@@ -47,26 +47,26 @@
 
 #include "QlmbCamWidget.hh"
 
-#include <qlayout.h>
-#include <qpushbutton.h>
-#include <qfont.h>
-#include <qmessagebox.h>
-#include <qvalidator.h>
+#include <QLayout>
+#include <QPushButton>
+#include <QFont>
+#include <QMessageBox>
+#include <QValidator>
 
 #include <vector>
 
 #include <LMBError.hh>
+#ifdef HAVE_LIBDC1394
 #include <FireCam.hh>
+#endif
 
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:Constructor
  *  ==> see headerfile
  *=======================================================================*/
 libqlmbcam::QlmbCamWidget::QlmbCamWidget( liblmbcam::LMBCam* camera,
-                                          QWidget* parent,
-                                          const char* name,
-                                          WFlags f)
-        :QScrollView( parent, name, f), _camera( camera), _controls( 0),
+                                          QWidget* parent)
+        :QScrollArea( parent), _camera( camera), _controls( 0),
          _modeCombo( 0), _framerateCombo( 0)
 {
   if( camera != 0)
@@ -94,11 +94,13 @@ libqlmbcam::QlmbCamWidget::~QlmbCamWidget()
 void
 libqlmbcam::QlmbCamWidget::setCamera( liblmbcam::LMBCam* camera)
 {
+#ifdef HAVE_LIBDC1394
   if( dynamic_cast<liblmbcam::FireCam*>( camera))
   {
     _camera = camera;
     createFireCamGUI();
   }
+#endif
 }
 
 /*=========================================================================
@@ -124,11 +126,16 @@ libqlmbcam::QlmbCamWidget::createFireCamGUI()
    *-----------------------------------------------------------------------*/
   _controls = new QWidget( viewport());
   _controls->setMinimumWidth( 300);
-  viewport()->setPaletteBackgroundColor( _controls->paletteBackgroundColor());
+  QPalette pal1 = _controls->palette();
+  QPalette pal2 = viewport()->palette();
+  pal2.setColor( viewport()->backgroundRole(),
+                 pal1.color( _controls->backgroundRole()));
+  viewport()->setPalette(pal2);
   
   QLabel* label;
-  QVBoxLayout* layout = new QVBoxLayout( _controls, 10, 2);
-
+  QVBoxLayout* layout = new QVBoxLayout( _controls);
+  layout->setMargin( 10);
+  layout->setSpacing( 2);
   /*-----------------------------------------------------------------------
    *  General information section
    *-----------------------------------------------------------------------*/
@@ -163,25 +170,26 @@ libqlmbcam::QlmbCamWidget::createFireCamGUI()
 
   layout->addSpacing( 5);
   
-  QHBoxLayout* modeLayout = new QHBoxLayout( layout);
+  QHBoxLayout* modeLayout = new QHBoxLayout( _controls);
   modeLayout->addWidget( new QLabel( "Mode:", _controls));
   _modeCombo = new QComboBox( _controls);
   _modeCombo->setEditable( false);
   modeLayout->addWidget( _modeCombo);
+  layout->addLayout( modeLayout);
   
-  QHBoxLayout* framerateLayout = new QHBoxLayout( layout);
+  QHBoxLayout* framerateLayout = new QHBoxLayout( _controls);
   framerateLayout->addWidget( new QLabel( "Framerate:", _controls));
   _framerateCombo = new QComboBox( _controls);
   _framerateCombo->setEditable( false);
   framerateLayout->addWidget( _framerateCombo);
-
+  layout->addLayout( framerateLayout);
+  
   connect( _modeCombo, SIGNAL( activated( const QString&)),
            this, SLOT( updateFramerateCombo( const QString&)));
   connect( _modeCombo, SIGNAL( activated( const QString&)),
            this, SLOT( updateLineEdits( const QString&)));
   
-  QGridLayout* geometryLayout = new QGridLayout( layout, 3, 4, -1,
-                                                 "geometryLayout");
+  QGridLayout* geometryLayout = new QGridLayout( _controls);
   geometryLayout->addWidget( new QLabel( "Left:", _controls), 0, 0);
   _left = new QLineEdit( QString::number( _camera->left()), _controls);
   _left->setAlignment( Qt::AlignRight);
@@ -215,15 +223,18 @@ libqlmbcam::QlmbCamWidget::createFireCamGUI()
   _maxHeight = new QLabel( QString::number( _camera->maxHeight()), _controls);
   _maxHeight->setAlignment( Qt::AlignRight);
   geometryLayout->addWidget( _maxHeight, 2, 3);
-
-  QHBoxLayout* buttonLayout = new QHBoxLayout( layout, -1, "buttonLayout");
+  
+  layout->addLayout( geometryLayout);
+  
+  QHBoxLayout* buttonLayout = new QHBoxLayout( _controls);
   QPushButton* setButton = new QPushButton( "Set", _controls);
   buttonLayout->addWidget( setButton);
   QPushButton* readButton = new QPushButton( "Read", _controls);
   buttonLayout->addWidget( readButton);
   QPushButton* resetButton = new QPushButton( "Reset", _controls);
   buttonLayout->addWidget( resetButton);
-
+  layout->addLayout( buttonLayout);
+  
   connect( setButton, SIGNAL( clicked()), this, SLOT( writeSettings()));
   connect( readButton, SIGNAL( clicked()), this, SLOT( readSettings()));
   connect( resetButton, SIGNAL( clicked()), this, SLOT( resetCamera()));
@@ -233,16 +244,17 @@ libqlmbcam::QlmbCamWidget::createFireCamGUI()
   for( std::vector<std::string>::const_iterator it = modes.begin();
        it != modes.end(); ++it)
   {
-    _modeCombo->insertItem( (*it).c_str());
+    _modeCombo->addItem( (*it).c_str());
     if( *it == _camera->mode())
     {
-      _modeCombo->setCurrentItem( count);
+      _modeCombo->setCurrentIndex( count);
     }
     ++count;
   }
 
   updateFramerateCombo( _camera->mode().c_str());
-  _framerateCombo->setCurrentText( QString::number( _camera->framerate()));
+  _framerateCombo->setCurrentIndex(
+      _framerateCombo->findText( QString::number( _camera->framerate())));
 
   updateLineEdits( _camera->mode().c_str());
   
@@ -258,7 +270,7 @@ libqlmbcam::QlmbCamWidget::createFireCamGUI()
 
   layout->addSpacing( 5);
   
-  QGrid* parameterGrid = new QGrid( 3, _controls);
+  QGridLayout* parameterGrid = new QGridLayout( _controls);
   parameterGrid->setSpacing( 5);
   
   /*-----------------------------------------------------------------------
@@ -284,9 +296,10 @@ libqlmbcam::QlmbCamWidget::createFireCamGUI()
     }
     else
     {
-      new QLabel( it->first.c_str(), parameterGrid);
-      new QLabel( parameterGrid);
-      new QLabel( QString::number( it->second->asFloat()), parameterGrid);
+      parameterGrid->addWidget( new QLabel( it->first.c_str()));
+      parameterGrid->addWidget( new QLabel);
+      parameterGrid->addWidget(
+          new QLabel( QString::number( it->second->asFloat())));
     }
   }
   
@@ -298,7 +311,7 @@ libqlmbcam::QlmbCamWidget::createFireCamGUI()
            = _checkBoxes.begin();
        boxIt != _checkBoxes.end(); ++boxIt)
   {
-    if( QString( boxIt->first).endsWith( "_auto"))
+    if( QString( boxIt->first.c_str()).endsWith( "_auto"))
     {
 
       /*-------------------------------------------------------------------
@@ -337,7 +350,7 @@ libqlmbcam::QlmbCamWidget::createFireCamGUI()
         }
       }
     }
-    else if( QString( boxIt->first).endsWith( "_abs_switch"))
+    else if( QString( boxIt->first.c_str()).endsWith( "_abs_switch"))
     {
       std::map<std::string,QLineEdit*>::const_iterator le =
           _lineEdits.find( boxIt->first.substr( 0, boxIt->first.size()-11) +
@@ -360,9 +373,9 @@ libqlmbcam::QlmbCamWidget::createFireCamGUI()
     }
   }
 
-  layout->addWidget( parameterGrid);
+  layout->addLayout( parameterGrid);
   
-  addChild( _controls);
+  //addChild( _controls);
   _controls->show();
 }
 
@@ -392,11 +405,11 @@ libqlmbcam::QlmbCamWidget::updateFramerateCombo( const QString& mode)
     _framerateCombo->setEditable( false);
     
     std::vector<double> framerates = _camera->availableFrameratesInMode(
-        mode.latin1());
+        mode.toLatin1().data());
     for( std::vector<double>::const_iterator it = framerates.begin();
          it != framerates.end(); ++it)
     {
-      _framerateCombo->insertItem( QString::number( *it), 0);
+      _framerateCombo->insertItem( 0, QString::number( *it));
     }
   }
 }
@@ -432,23 +445,25 @@ libqlmbcam::QlmbCamWidget::updateLineEdits( const QString& mode)
 QLineEdit*
 libqlmbcam::QlmbCamWidget::createLineEdit( const QString& name,
                                          liblmbcam::LMBCamParam* param,
-                                         QGrid* parent)
+                                         QGridLayout* layout)
 {
   /*-----------------------------------------------------------------------
    *  Create three widgets, as long as the parent grid has three rows
    *-----------------------------------------------------------------------*/
-  new QLabel( name, parent);
-  QLineEdit* lineedit = new QLineEdit( QString::number( param->asFloat()),
-                                       parent, name.latin1());
+  size_t row = layout->rowCount();
+  layout->addWidget( new QLabel( name), row, 0);
+  QLineEdit* lineedit = new QLineEdit( QString::number( param->asFloat()));
+  lineedit->setObjectName( name);
   lineedit->setValidator( new QDoubleValidator( param->minValueAsFloat(),
                                                 param->maxValueAsFloat(),
                                                 10,
                                                 lineedit));
   connect( lineedit, SIGNAL( returnPressed()),
            this, SLOT( changeAbsParamValue()));
-  new QLabel(parent);
+  layout->addWidget( lineedit, row, 1);
+  layout->addWidget( new QLabel, row, 2);
 
-  _lineEdits[name.latin1()] = lineedit;
+  _lineEdits[name.toLatin1().data()] = lineedit;
   
   return lineedit;
 }
@@ -462,7 +477,7 @@ libqlmbcam::QlmbCamWidget::createLineEdit( const QString& name,
 QSlider*
 libqlmbcam::QlmbCamWidget::createSlider( const QString& name,
                                          liblmbcam::LMBCamParam* param,
-                                         QGrid* parent)
+                                         QGridLayout* layout)
 {
   /*-----------------------------------------------------------------------
    *  Only create slider if min and max value differ... otherwise it
@@ -473,21 +488,23 @@ libqlmbcam::QlmbCamWidget::createSlider( const QString& name,
   /*-----------------------------------------------------------------------
    *  Create three widgets, as long as the parent grid has three rows
    *-----------------------------------------------------------------------*/
-  new QLabel( name, parent);
-  QSlider* slider = new QSlider( param->minValueAsInt(),
-                                 param->maxValueAsInt(),
-                                 1,
-                                 param->asInt(),
-                                 Qt::Horizontal,
-                                 parent,
-                                 name.latin1());
+  size_t row = layout->rowCount();
+  layout->addWidget( new QLabel( name), row, 0);
+  QSlider* slider = new QSlider( Qt::Horizontal);
+  slider->setMinimum( param->minValueAsInt());
+  slider->setMaximum( param->maxValueAsInt());
+  slider->setPageStep( 1);
+  slider->setValue( param->asInt());
+  slider->setObjectName( name);
+  layout->addWidget( slider, row, 1);
+  QLabel* label = new QLabel( QString::number( param->asInt()));
+  layout->addWidget( label, row, 2);
   connect( slider, SIGNAL( valueChanged(int)),
-           new QLabel( QString::number( param->asInt()), parent),
-           SLOT( setNum(int)));
+           label, SLOT( setNum(int)));
   connect( slider, SIGNAL( valueChanged(int)),
            this, SLOT( changeParamValue(int)));
-
-  _sliders[name.latin1()] = slider;
+  
+  _sliders[name.toLatin1().data()] = slider;
   
   return slider;
 }
@@ -501,17 +518,20 @@ libqlmbcam::QlmbCamWidget::createSlider( const QString& name,
 QCheckBox*
 libqlmbcam::QlmbCamWidget::createCheckBox( const QString& name,
                                            liblmbcam::LMBCamParam* param,
-                                           QGrid* parent)
+                                           QGridLayout* layout)
 {
   /*-----------------------------------------------------------------------
    *  Create three widgets, as long as the parent grid has three rows
    *-----------------------------------------------------------------------*/
-  new QLabel( name, parent);
-  QCheckBox* checkbox = new QCheckBox( parent, name.latin1());
+  size_t row = layout->rowCount();
+  layout->addWidget( new QLabel( name), row, 0);
+  QCheckBox* checkbox = new QCheckBox;
+  checkbox->setObjectName( name);
   checkbox->setChecked( param->asInt());
-  new QLabel( parent);
+  layout->addWidget( checkbox);
+  layout->addWidget( new QLabel( name), row, 2);
 
-  _checkBoxes[name.latin1()] = checkbox;
+  _checkBoxes[name.toLatin1().data()] = checkbox;
   connect( checkbox, SIGNAL( toggled(bool)),
            this, SLOT( changeAutoMode(bool)));
 
@@ -526,7 +546,7 @@ void
 libqlmbcam::QlmbCamWidget::changeAbsParamValue()
 {
   std::map<std::string,QLineEdit*>::const_iterator le =
-      _lineEdits.find( sender()->name());
+      _lineEdits.find( sender()->objectName().toLatin1().data());
   if( le != _lineEdits.end())
   {
     liblmbcam::LMBCamParam* param =
@@ -548,11 +568,11 @@ libqlmbcam::QlmbCamWidget::changeAbsParamValue()
 void
 libqlmbcam::QlmbCamWidget::changeParamValue( int value)
 {
-  QString parameter = sender()->name();
+  QString parameter = sender()->objectName();
   
-  _camera->param( parameter.latin1())->setValue( value);
+  _camera->param( parameter.toLatin1().data())->setValue( value);
   std::map<std::string,QLineEdit*>::const_iterator le =
-      _lineEdits.find( parameter + "_abs");
+      _lineEdits.find( (parameter + "_abs").toLatin1().data());
   if( le != _lineEdits.end())
   {
     le->second->setText( QString::number(
@@ -567,9 +587,9 @@ libqlmbcam::QlmbCamWidget::changeParamValue( int value)
 void
 libqlmbcam::QlmbCamWidget::changeAutoMode( bool autoMode)
 {
-  QString parameter = sender()->name();
+  QString parameter = sender()->objectName();
 
-  _camera->param( parameter.latin1())->setValue( autoMode ? 1 : 0);
+  _camera->param( parameter.toLatin1().data())->setValue( autoMode ? 1 : 0);
 }
 
 /*=========================================================================
@@ -579,9 +599,9 @@ libqlmbcam::QlmbCamWidget::changeAutoMode( bool autoMode)
 void
 libqlmbcam::QlmbCamWidget::changeAbsControl( bool absMode)
 {
-  QString parameter = sender()->name();
+  QString parameter = sender()->objectName();
 
-  _camera->param( parameter.latin1())->setValue( absMode ? 1 : 0);
+  _camera->param( parameter.toLatin1().data())->setValue( absMode ? 1 : 0);
 }
 
 /*=========================================================================
@@ -621,10 +641,11 @@ libqlmbcam::QlmbCamWidget::unlockControls()
 void
 libqlmbcam::QlmbCamWidget::readSettings()
 {
-  _modeCombo->setCurrentText( _camera->mode().c_str());
+  _modeCombo->setCurrentIndex( 
+      _modeCombo->findText( _camera->mode().c_str()));
   updateFramerateCombo( _modeCombo->currentText());
-  _framerateCombo->setCurrentText(
-      QString::number( _camera->framerate()));
+  _framerateCombo->setCurrentIndex(
+      _framerateCombo->findText( QString::number( _camera->framerate())));
   _left->setText( QString::number( _camera->left()));
   _top->setText( QString::number( _camera->top()));
   _width->setText( QString::number( _camera->width()));
@@ -649,7 +670,7 @@ libqlmbcam::QlmbCamWidget::writeSettings()
       emit( stopCamera());
     }
 
-    _camera->setMode( _modeCombo->currentText().latin1());
+    _camera->setMode( _modeCombo->currentText().toLatin1().data());
     if( _modeCombo->currentText().startsWith( "Format7"))
     {
       _camera->setLeft( _left->text().toInt());

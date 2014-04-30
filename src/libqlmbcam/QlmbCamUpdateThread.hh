@@ -21,7 +21,7 @@
 #ifndef QLMBCAMUPDATETHREAD_HH
 #define QLMBCAMUPDATETHREAD_HH
 
-#include <qthread.h>
+#include <QThread>
 
 namespace libqlmbcam
 {

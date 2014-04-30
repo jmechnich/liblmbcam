@@ -51,11 +51,12 @@
 #ifndef QLMBCAMMAINWIDGET_HH
 #define QLMBCAMMAINWIDGET_HH
 
-#include <qmainwindow.h>
-#include <qhbox.h>
-#include <qlabel.h>
+#include <QMainWindow>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QlmbCamParamControl.hh>
 #include <QlmbCamModeControl.hh>
+#include <QCloseEvent>
 
 #include <LMBCam.hh>
 #include <LMBCamParam.hh>
@@ -105,7 +106,7 @@ private:
   
   liblmbcam::LMBCam* p_camera;
   FastImageDisplayWid* p_fidWidget;
-  QHBox* p_controls;
+  QWidget* p_controls;
   QlmbCamModeControlWidget* p_modeControl;
   
 

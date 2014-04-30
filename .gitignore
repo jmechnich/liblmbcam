@@ -51,3 +51,9 @@ Makefile
 src/liblmbcam/scripts/liblmbcam-config
 src/liblmbcam/scripts/liblmbcam-local-config
 moc_*
+
+/src/examples/FilltimeBugCheck
+/src/examples/multiview/multiview
+/src/examples/qlmbcam/qlmbcam
+/src/libqlmbcam/scripts/libqlmbcam-config
+/src/libqlmbcam/scripts/libqlmbcam-local-config

@@ -234,7 +234,7 @@ QlmbCamMainWidget::changeVideoMode( const QString& mode)
 {
   try
   {
-    p_camera->setMode( mode.latin1());
+    p_camera->setMode( mode.toLatin1().data());
     p_currentFrame = -1;
     p_fidWidget->setImageSize( p_camera->width(),
                                p_camera->height());
