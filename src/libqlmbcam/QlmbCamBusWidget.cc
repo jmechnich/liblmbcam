@@ -1,48 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: QlmbCamBusWidget.cc,v $
-**   $Revision: 1.9 $$Name:  $
-**       $Date: 2006/06/08 11:57:18 $
-**   Copyright: GPL $Author: jhense $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: QlmbCamBusWidget.cc,v $
-**  Revision 1.9  2006/06/08 11:57:18  jhense
-**  Added empty destructor.
-**
-**  Revision 1.8  2004/10/19 05:55:38  mechnich
-**  added DMA stuff without testing, will probably need future fixes; added absolute control features
-**
-**  Revision 1.7  2004/02/20 22:42:30  mechnich
-**  corrected error handling
-**
-**  Revision 1.6  2003/12/18 15:32:14  mechnich
-**  on rescan up to 8 FireCamBusses are checked for existence
-**
-**  Revision 1.5  2003/12/02 16:36:57  mechnich
-**  removed V4L support until problem with inclusion of <linux/videodev2.h> is fixed
-**
-**  Revision 1.4  2003/10/17 22:52:48  mechnich
-**  - added geometric equalizer
-**  - camera in bus widget is selected now when video widget gets focus
-**  - fixed bug in update image
-**
-**  Revision 1.3  2003/10/10 15:14:31  mechnich
-**  added V4L support
-**
-**  Revision 1.2  2003/10/05 19:28:35  mechnich
-**  update
-**
-**  Revision 1.1  2003/10/02 15:35:03  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "QlmbCamBusWidget.hh"
 
@@ -70,6 +39,8 @@ libqlmbcam::QlmbCamBusWidget::QlmbCamBusWidget( QWidget* parent)
   header->setText( 3, "Node ID");
   setRootIsDecorated( true);
   setAllColumnsShowFocus( true);
+  setSelectionMode( QAbstractItemView::SingleSelection);
+  
   connect( this, SIGNAL( itemSelectionChanged()),
            this, SLOT( changeSelectedCamera()));
 }
@@ -80,6 +51,18 @@ libqlmbcam::QlmbCamBusWidget::QlmbCamBusWidget( QWidget* parent)
  *=======================================================================*/
 libqlmbcam::QlmbCamBusWidget::~QlmbCamBusWidget()
 {
+  clearBusses();
+}
+
+void
+libqlmbcam::QlmbCamBusWidget::clearBusses()
+{
+  for( std::map<QString,liblmbcam::LMBCamBus*>::iterator it=_busses.begin();
+       it!=_busses.end(); ++it)
+  {
+    delete it->second;
+  }
+  _busses.clear();
 }
 
 /*=========================================================================
@@ -90,12 +73,7 @@ void
 libqlmbcam::QlmbCamBusWidget::rescan()
 {
   clear();
-  for( std::map<QString,liblmbcam::LMBCamBus*>::iterator it=_busses.begin();
-       it!=_busses.end(); ++it)
-  {
-    delete it->second;
-  }
-  _busses.clear();
+  clearBusses();
   
   /*-----------------------------------------------------------------------
    *  Scan for ieee1394 busses
@@ -107,20 +85,22 @@ libqlmbcam::QlmbCamBusWidget::rescan()
   flags &= ~Qt::ItemIsSelectable;
   ieee1394root->setFlags( flags);
   
-//   QListViewItem* v4lroot = new QListViewItem( this, "V4LCamBus");
-//   v4lroot->setOpen( true);
-//   v4lroot->setSelectable( false);
+  QTreeWidgetItem* v4lroot = new QTreeWidgetItem( this);
+  v4lroot->setText( 0, "V4LCamBus");
+  v4lroot->setExpanded( true);
+  v4lroot->setFlags( flags);
   
-  // int errorhandlerMode = liblmbcam::LMBErrorHandler::ErrorHandler()->mode();
-  // liblmbcam::LMBErrorHandler::ErrorHandler()->setMode(
-  //     liblmbcam::LMBErrorHandler::THROW);
+  int errorhandlerMode = liblmbcam::LMBErrorHandler::ErrorHandler()->mode();
+  liblmbcam::LMBErrorHandler::ErrorHandler()->setMode(
+      liblmbcam::LMBErrorHandler::THROW);
   
+  liblmbcam::LMBCam* tmpCamera = 0;
+  QString busName;
   try
   {
-    QString busName( "FireCamBus");
+    busName = ieee1394root->text(0);
     _busses[busName] = new liblmbcam::LMBCamBusIndex(
         liblmbcam::LMBCamBusIndex::FireCam);
-    liblmbcam::LMBCam* tmpCamera = 0;
     for( unsigned int i=0; i < _busses[busName]->nCameras(); ++i)
     {
       tmpCamera = _busses[busName]->cameraByIndex( i);
@@ -136,35 +116,43 @@ libqlmbcam::QlmbCamBusWidget::rescan()
       ieee1394root->setExpanded( true);
     }
     
-//     try
-//     {
-//       _busses["V4LCamBus0"] = new liblmbcam::V4LCamBus;
-//       tmp = new QTreeWidgetItem( v4lroot, "0");
-//       tmp->setSelectable( false);
-//       for( unsigned int i=0; i < _busses["V4LCamBus0"]->nCameras(); ++i)
-//       {
-//         tmpCamera = _busses["V4LCamBus0"]->cameraByIndex( i);
-//         new QTreeWidgetItem( tmp, "V4LCam"+QString::number(i),
-//                            tmpCamera->vendor().c_str(),
-//                            tmpCamera->model().c_str(),
-//                            tmpCamera->guid().c_str());
-//       }
-      
-//       if( tmp->firstChild() != 0)
-//       {
-//         tmp->setOpen( true);
-//       }
-//     }
-//     catch(...)
-//     {
-//     }
+    busName = v4lroot->text(0);
+    _busses[busName] = new liblmbcam::LMBCamBusIndex(
+        liblmbcam::LMBCamBusIndex::V4LCam);
+    for( unsigned int i=0; i < _busses[busName]->nCameras(); ++i)
+    {
+      tmpCamera = _busses[busName]->cameraByIndex( i);
+      QTreeWidgetItem* tmpCameraItem = new QTreeWidgetItem( v4lroot);
+      tmpCameraItem->setText( 0, "V4LCam"+QString::number(i));
+      tmpCameraItem->setText( 1, tmpCamera->vendor().c_str());
+      tmpCameraItem->setText( 2, tmpCamera->model().c_str());
+      tmpCameraItem->setText( 3, tmpCamera->guid().c_str());
+    }
     
-//     liblmbcam::LMBErrorHandler::ErrorHandler()->setMode( errorhandlerMode);
+    if( v4lroot->child(0) != 0)
+    {
+      v4lroot->setExpanded( true);
+    }
+    
   }
   catch( liblmbcam::LMBCamBusError& err)
   {
     QMessageBox::warning( this, "Rescan bus ...",
                           "Caught LMBCamBusError: " +
+                          QString( err.str().c_str()),
+                          QMessageBox::Ok, 0);
+  }
+  catch( liblmbcam::LMBCamError& err)
+  {
+    QMessageBox::warning( this, "Rescan bus ...",
+                          "Caught LMBCamError: " +
+                          QString( err.str().c_str()),
+                          QMessageBox::Ok, 0);
+  }
+  catch( liblmbcam::LMBError& err)
+  {
+    QMessageBox::warning( this, "Rescan bus ...",
+                          "Caught LMBError: " +
                           QString( err.str().c_str()),
                           QMessageBox::Ok, 0);
   }
@@ -174,6 +162,8 @@ libqlmbcam::QlmbCamBusWidget::rescan()
                           "Unknown error !!! ",
                           QMessageBox::Ok, 0);
   }
+
+  liblmbcam::LMBErrorHandler::ErrorHandler()->setMode( errorhandlerMode);
 }
 
 /*=========================================================================
@@ -207,7 +197,8 @@ libqlmbcam::QlmbCamBusWidget::changeSelectedCamera( const QString& guid)
     {
       if( !(*it)->isSelected())
       {
-        (*it)->setSelected( true);
+        setCurrentItem( *it);
+        //(*it)->setSelected( true);
       }
           
       return;
@@ -216,11 +207,3 @@ libqlmbcam::QlmbCamBusWidget::changeSelectedCamera( const QString& guid)
     ++it;
   }
 }
-
-/*=========================================================================
- *  DESCRIPTION OF FUNCTION:
- *  ==> see headerfile
- *=======================================================================*/
-void
-libqlmbcam::QlmbCamBusWidget::addCamera( liblmbcam::LMBCam* cam)
-{}

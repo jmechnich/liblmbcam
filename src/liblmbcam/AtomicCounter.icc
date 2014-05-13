@@ -1,37 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: AtomicCounter.icc,v $
-**   $Revision: 1.6 $$Name:  $
-**       $Date: 2004/02/23 13:52:32 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: AtomicCounter.icc,v $
-**  Revision 1.6  2004/02/23 13:52:32  mechnich
-**  allocate mutex on heap to prevent smp system from hanging
-**
-**  Revision 1.5  2004/02/20 22:37:54  mechnich
-**  added MutexLocker class
-**
-**  Revision 1.4  2003/11/05 16:25:38  mechnich
-**  sync
-**
-**  Revision 1.3  2003/06/12 16:13:19  mechnich
-**  added comments
-**
-**  Revision 1.2  2003/05/07 00:05:15  mechnich
-**  made the mutex allocated on the stack
-**
-**  Revision 1.1  2003/04/16 16:38:26  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:AtomicCounter<T>::AtomicCounter()
@@ -40,9 +20,9 @@
 template<typename T>
 inline
 AtomicCounter<T>::AtomicCounter()
-        : p_counter( T(0)), p_lock( new pthread_mutex_t)
+        : p_counter( T(0))
 {
-  pthread_mutex_init( p_lock, NULL);
+  pthread_mutex_init( &p_lock, NULL);
 }
 
 /*=========================================================================
@@ -52,9 +32,9 @@ AtomicCounter<T>::AtomicCounter()
 template<typename T>
 inline
 AtomicCounter<T>::AtomicCounter( T value)
-        : p_counter( value), p_lock( new pthread_mutex_t)
+        : p_counter( value)
 {
-  pthread_mutex_init( p_lock, NULL);
+  pthread_mutex_init( &p_lock, NULL);
 }
 
 /*=========================================================================
@@ -64,8 +44,7 @@ AtomicCounter<T>::AtomicCounter( T value)
 template<typename T>
 AtomicCounter<T>::~AtomicCounter()
 {
-  pthread_mutex_destroy( p_lock);
-  delete p_lock;
+  pthread_mutex_destroy( &p_lock);
 }
 
 /*=========================================================================
@@ -77,7 +56,7 @@ inline
 T
 AtomicCounter<T>::operator++()
 {
-  MutexLocker locker( p_lock);
+  MutexLocker locker( &p_lock);
   return ++p_counter;
 }
 
@@ -90,7 +69,7 @@ inline
 T
 AtomicCounter<T>::operator++(int)
 {
-  MutexLocker locker( p_lock);
+  MutexLocker locker( &p_lock);
   return p_counter++;
 }
 
@@ -103,7 +82,7 @@ inline
 T
 AtomicCounter<T>::operator--()
 {
-  MutexLocker locker( p_lock);
+  MutexLocker locker( &p_lock);
   return --p_counter;
 }
 
@@ -116,7 +95,7 @@ inline
 T
 AtomicCounter<T>::operator--(int)
 {
-  MutexLocker locker( p_lock);
+  MutexLocker locker( &p_lock);
   return p_counter--;
 }
 
@@ -129,7 +108,7 @@ inline
 T
 AtomicCounter<T>::operator+=( T change)
 {
-  MutexLocker locker( p_lock);
+  MutexLocker locker( &p_lock);
   p_counter += change;
   return p_counter;
 }
@@ -143,7 +122,7 @@ inline
 T
 AtomicCounter<T>::operator-=(T change)
 {
-  MutexLocker locker( p_lock);
+  MutexLocker locker( &p_lock);
   p_counter -= change;
   return p_counter;
 }
@@ -157,7 +136,7 @@ inline
 T
 AtomicCounter<T>::operator+(T change)
 {
-  MutexLocker locker( p_lock);
+  MutexLocker locker( &p_lock);
   return (p_counter + change);
 }
 
@@ -170,7 +149,7 @@ inline
 T
 AtomicCounter<T>::operator-(T change)
 {
-  MutexLocker locker( p_lock);
+  MutexLocker locker( &p_lock);
   return (p_counter - change);
 }
 
@@ -180,9 +159,9 @@ AtomicCounter<T>::operator-(T change)
  *=======================================================================*/
 template<typename T>
 inline
-AtomicCounter<T>::operator T()
+AtomicCounter<T>::operator T() const
 {
-  MutexLocker locker( p_lock);
+  MutexLocker locker( &p_lock);
   return p_counter;
 }
 
@@ -195,7 +174,7 @@ inline
 T
 AtomicCounter<T>::operator=( T value)
 {
-  MutexLocker locker( p_lock);
+  MutexLocker locker( &p_lock);
   p_counter = value;
   return p_counter;
 }
@@ -209,7 +188,7 @@ inline
 bool
 AtomicCounter<T>::operator!(void)
 {
-  MutexLocker locker( p_lock);
+  MutexLocker locker( &p_lock);
   if( p_counter)
       return false;
   return true;

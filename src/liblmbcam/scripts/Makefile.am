@@ -9,7 +9,7 @@ PACKAGELIBS = -llmbcam
 PACKAGELTLIBS = $(libdir)/liblmbcam.la
 PACKAGECFLAGS = -I$(pkgincludedir)
 PACKAGEEXTCFLAGS = $(CPPFLAGS) -D_REENTRANT
-PACKAGELDFLAGS = $(LDFLAGS) @libdc1394_LIBS@ @libraw1394_LIBS@ -lpthread
+PACKAGELDFLAGS = $(LDFLAGS) @LIBS@ @libdc1394_LIBS@ @libraw1394_LIBS@ @libv4l2_LIBS@ @libudev_LIBS@ -lpthread
 
 #
 # 

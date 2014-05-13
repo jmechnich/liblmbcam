@@ -1,26 +1,21 @@
-/**************************************************************************
-**       Title: hello world test for qt within matlab
-**    $RCSfile: test_qt.cc,v $
-**   $Revision: 1.1 $$Name:  $
-**       $Date: 2004/03/18 15:59:52 $
-**   Copyright: GPL $Author: ronneber $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: test_qt.cc,v $
-**  Revision 1.1  2004/03/18 15:59:52  ronneber
-**  *** empty log message ***
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <fstream>
-#include <qapplication.h>
-#include <qpushbutton.h>
+#include <QApplication>
+#include <QPushButton>
 #include <pthread.h>
 #include <unistd.h> // for sleep()
 #include <signal.h>

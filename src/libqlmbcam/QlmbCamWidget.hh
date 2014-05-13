@@ -1,28 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: QlmbCamWidget.hh,v $
-**   $Revision: 1.3 $$Name:  $
-**       $Date: 2006/05/19 11:29:09 $
-**   Copyright: GPL $Author: jhense $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: QlmbCamWidget.hh,v $
-**  Revision 1.3  2006/05/19 11:29:09  jhense
-**  Stopping camera when destroyed.
-**
-**  Revision 1.2  2004/10/19 05:55:38  mechnich
-**  added DMA stuff without testing, will probably need future fixes; added absolute control features
-**
-**  Revision 1.1  2003/10/05 19:27:20  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef QLMBCAMWIDGET_HH
 #define QLMBCAMWIDGET_HH
@@ -63,7 +52,7 @@ namespace libqlmbcam
     void startCamera();
     void stopCamera();
     
-  protected slots:
+  private slots:
     void updateFramerateCombo( const QString& mode);
     void updateLineEdits( const QString& mode);
     void changeAbsParamValue();
@@ -71,8 +60,9 @@ namespace libqlmbcam
     void changeAutoMode( bool autoMode);
     void changeAbsControl( bool absMode);
     
-  protected:
-    virtual void createFireCamGUI();
+  private:
+    void clearControls();
+    void createGUI();
 
     QLineEdit* createLineEdit( const QString& name,
                                liblmbcam::LMBCamParam* param,
@@ -98,9 +88,8 @@ namespace libqlmbcam
     QLabel* _maxHeight;
     
     std::map<std::string,QLineEdit*> _lineEdits;
-    std::map<std::string,QSlider*> _sliders;
+    std::map<std::string,QSlider*>   _sliders;
     std::map<std::string,QCheckBox*> _checkBoxes;
-  
   };
 }
 

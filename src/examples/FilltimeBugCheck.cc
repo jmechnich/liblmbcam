@@ -1,47 +1,17 @@
- /**************************************************************************
-**       Title: 
-**    $RCSfile: FilltimeBugCheck.cc,v $
-**   $Revision: 1.2 $$Name:  $
-**       $Date: 2006/06/28 09:13:25 $
-**   Copyright: GPL $Author: jhense $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: FilltimeBugCheck.cc,v $
-**  Revision 1.2  2006/06/28 09:13:25  jhense
-**  Setting shutter to 10ms, first setup mode, then set width/height.
-**
-**  Revision 1.1  2006/06/22 14:17:36  jhense
-**  Added to repository.
-**
-**  Revision 1.8  2005/09/13 07:46:23  jhense
-**  *** empty log message ***
-**
-**  Revision 1.6  2004/10/19 05:50:12  mechnich
-**  changed LMBError interface
-**
-**  Revision 1.5  2003/05/21 08:57:22  mechnich
-**  changed interface of liblmbcam again
-**
-**  Revision 1.4  2003/01/20 10:22:24  mechnich
-**  *** empty log message ***
-**
-**  Revision 1.3  2002/12/18 12:55:50  mechnich
-**  corrected error in recognition of the PYRO WEBCAM
-**
-**  Revision 1.2  2002/12/10 02:44:42  mechnich
-**  added preliminary support for the Bayer C301fc in test_liveWidget
-**  added more tests to test_FireCam
-**
-**  Revision 1.1  2002/12/04 13:17:46  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <LMBCamBusIndex.hh>
 #include <LMBCamParam.hh>

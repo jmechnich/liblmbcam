@@ -1,92 +1,18 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: FireCamParam.cc,v $
-**   $Revision: 1.18 $$Name:  $
-**       $Date: 2006/03/09 14:55:32 $
-**   Copyright: GPL $Author: jhense $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: FireCamParam.cc,v $
-**  Revision 1.18  2006/03/09 14:55:32  jhense
-**  New function measureRelativeStarttimes to get the timing of a
-**  sequence.
-**
-**  Revision 1.17  2005/07/08 16:38:44  tschmidt
-**  - If auto mode switch off request occurs, and no manual mode is available
-**    an additional check is introduced, whether the feature is on_off_capable
-**    and depending on this capability the auto_mode switch is turned off...
-**    The sliders keep enabled, but due to their range (0..0) they are not
-**    usable. In a later correction they should be suppressed at all
-**
-**  Revision 1.16  2004/12/03 09:07:16  ronneber
-**  - added several initializations to zero to make valgrind happy
-**
-**  Revision 1.15  2004/11/05 03:45:57  mechnich
-**  added resetValue() to FireCamAbsRange class, which resets the last given value for this feature
-**
-**  Revision 1.14  2004/10/19 05:54:46  mechnich
-**  added DMA stuff without testing, will probably need future fixes; added absolute control features
-**
-**  Revision 1.13  2004/02/20 23:40:25  mechnich
-**  replaced ordinary mutex locks and unlocks by creation of a MutexLocker object
-**
-**  Revision 1.12  2003/07/03 15:25:17  mechnich
-**  - added comments
-**  - improved Format7 capabilities
-**  - added boolean return values to set...() functions
-**
-**  Revision 1.11  2003/06/12 16:13:19  mechnich
-**  added comments
-**
-**  Revision 1.10  2003/05/12 15:39:21  mechnich
-**  all functions unlock the libraw mutex before throwing an error now
-**
-**  Revision 1.9  2003/05/07 00:06:29  mechnich
-**  intorduced a wrapper mutex for critical libraw1394 functions,
-**  liblmbcam should now be completely thread safe
-**
-**  Revision 1.8  2003/05/06 23:05:39  mechnich
-**  - increased thread safety of library
-**  - restructured parameter classes, introduced new subclasses to LMBCamParam:
-**    LMBCamParamIntRange and LMBCamParamSwitch
-**    TODO: add LMBCamParamDoubleRange for absolute features
-**
-**  Revision 1.7  2003/05/05 02:33:36  mechnich
-**  added functions for querying and setting auto mode
-**
-**  Revision 1.6  2003/04/23 13:28:52  mechnich
-**  - fixed parameter queries for all tested cameras
-**  - fixed bug in iso handler function
-**  - moved p_cameraIsRunning with affiliated functions to LMBCam
-**
-**  Revision 1.5  2003/01/20 10:22:24  mechnich
-**  *** empty log message ***
-**
-**  Revision 1.4  2003/01/03 16:23:12  mechnich
-**  corrected minor bugs
-**
-**  Revision 1.3  2002/12/11 04:21:21  mechnich
-**  made non-dma mode the default
-**  adapted parameter handling for dma accordingly
-**
-**  Revision 1.2  2002/12/10 02:42:06  mechnich
-**  added dma related functions in LMBCam
-**  fixed bugs with PYRO WEBCAM API-200
-**
-**  Revision 1.1  2002/12/04 13:17:46  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
-/*-------------------------------------------------------------------------
- *  Own includes
- *-------------------------------------------------------------------------*/
 #include "FireCamParam.hh"
 
 #include "MutexLocker.hh"

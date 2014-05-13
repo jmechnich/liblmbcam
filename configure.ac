@@ -1,9 +1,8 @@
 AC_INIT([liblmbcam],[0.1.0])
-AC_CANONICAL_HOST
-AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([src/liblmbcam/LMBCam.hh])
-AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
+
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_ARG_WITH([qt],
 	    AC_HELP_STRING([--with-qt],
@@ -30,7 +29,6 @@ AC_LANG(C++)
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
 AC_PROG_INSTALL
-AC_CACHE_SAVE
 
 PKG_PROG_PKG_CONFIG([0.17])
 
@@ -45,7 +43,11 @@ if test $enable_matlab = "yes"; then
 	AC_CHECK_HEADER( mex.h, [], AC_MSG_ERROR( matlab headers are missing))
 fi
 
-AC_CACHE_SAVE
+AC_CHECK_HEADER([jpeglib.h], [], AC_MSG_ERROR( libjpeg headers are missing))
+AC_CHECK_LIB([jpeg],[jpeg_start_decompress], [], AC_MSG_ERROR( libjpeg is missing))
+
+PKG_CHECK_MODULES([libv4l2], [libv4l2 >= 1.0])
+PKG_CHECK_MODULES([libudev], [libudev >= 200])
 
 # Check for libraw1394
 PKG_CHECK_MODULES([libraw1394], [libraw1394])
@@ -55,6 +57,7 @@ PKG_CHECK_MODULES([libdc1394], [libdc1394], [], [
     PKG_CHECK_MODULES([libdc1394], [libdc1394-2], [], [AC_CHECK_LIBDC])])
 
 AM_CONDITIONAL([HAVE_LIBDC1394], [test x"$libdc1394_LIBS" != x])
+AM_CONDITIONAL([HAVE_LIBV4L2], [test x"$libv4l2_LIBS" != x])
 
 # Check for libtif
 AC_CHECK_HEADER( tiffio.h, [], AC_MSG_ERROR( libtiff headers are missing))

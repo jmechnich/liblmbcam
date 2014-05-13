@@ -1,28 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: LMBCamBusIndex.hh,v $
-**   $Revision: 1.3 $$Name:  $
-**       $Date: 2004/06/29 16:27:53 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: LMBCamBusIndex.hh,v $
-**  Revision 1.3  2004/06/29 16:27:53  mechnich
-**  added getFirstCamera()
-**
-**  Revision 1.2  2004/06/06 17:03:21  mechnich
-**  *** empty log message ***
-**
-**  Revision 1.1  2004/05/30 20:54:20  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef LMBCAMBUSINDEX_HH
 #define LMBCAMBUSINDEX_HH
@@ -48,36 +37,8 @@ namespace liblmbcam
     LMBCamBusIndex( BusType type=All);
     ~LMBCamBusIndex();
 
-/*======================================================================*/
-/*! 
- *   This function should return the number of cameras attached to the bus
- *
- *   \return number of cameras
- */
-/*======================================================================*/
     unsigned int nCameras() const;
-
-/*======================================================================*/
-/*! 
- *   This function should return a pointer to camera <em>index</em>
- *
- *   \param index  camera index
- *   \exception throws LMBCamBusError_OutOfBounds camera <em>index</em>
- *              does not exist
- *   \return pointer to camera <em>index</em>
- */
-/*======================================================================*/
     LMBCam* cameraByIndex( unsigned int index) const;
-
-/*======================================================================*/
-/*! 
- *   This function should return a pointer to the camera
- *   with GUID <em>guid</em>.
- *
- *   \param guid camera GUID
- *   \return pointer to camera with GUID <em>guid</em>
- */
-/*======================================================================*/
     LMBCam* cameraByGUID( const std::string& guid) const;
 
   private:

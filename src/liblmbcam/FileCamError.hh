@@ -1,34 +1,23 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: FileCamError.hh,v $
-**   $Revision: 1.1 $$Name:  $
-**       $Date: 2003/11/05 16:31:39 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: FileCamError.hh,v $
-**  Revision 1.1  2003/11/05 16:31:39  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef FILECAMERROR_HH
 #define FILECAMERROR_HH
 
-/*-------------------------------------------------------------------------
- *  Own includes
- *-------------------------------------------------------------------------*/
 #include "LMBCamError.hh"
 
-/*-------------------------------------------------------------------------
- *  STL includes
- *-------------------------------------------------------------------------*/
 #include <string>
 
 namespace liblmbcam
@@ -43,13 +32,6 @@ namespace liblmbcam
   class FileCamError : public LMBCamError
   {
   public:
-/*======================================================================*/
-/*! 
- *   Constructor
- *
- *   \param errmsg error message
- */
-/*======================================================================*/
     FileCamError( const std::string& errmsg)
             :LMBCamError( errmsg)
           {}

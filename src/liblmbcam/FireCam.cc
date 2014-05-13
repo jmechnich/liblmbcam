@@ -1,291 +1,32 @@
-/**************************************************************************
- **       Title: 
- **    $RCSfile: FireCam.cc,v $
- **   $Revision: 1.70 $$Name:  $
- **       $Date: 2006/07/13 12:54:17 $
- **   Copyright: GPL $Author: jhense $
- ** Description:
- **
- **    
- **
- **-------------------------------------------------------------------------
- **
- **  $Log: FireCam.cc,v $
- **  Revision 1.70  2006/07/13 12:54:17  jhense
- **  Added new interface getFrameStartMutex(). Other threads can be notified, when
- **  frame transmission started. Raw-Mode support in SMP-kernels implemented. Internal
- **  buffer-size is reduced a little bit to the size of frame (not the transmitted
- **  packages).
- **
- **  Revision 1.69  2006/07/06 16:57:32  mechnich
- **  created define to enable/disable SMP-checking (raw capture seems to work now on Ubuntu SMP system)
- **
- **  Revision 1.68  2006/07/04 11:59:44  mechnich
- **  corrected detection of number of cpus
- **
- **  Revision 1.67  2006/06/29 13:08:54  jhense
- **  Set format7/format7Max-Width/height from predefined value to zero.
- **
- **  Revision 1.66  2006/06/28 08:07:17  jhense
- **  Defined NUM_DMA_BUFFERS as constant.
- **
- **  Revision 1.65  2006/06/22 09:55:08  jhense
- **  Improved smp-kernel detection.
- **
- **  Revision 1.64  2006/06/16 15:19:16  jhense
- **  Access to cameracapture, debug-message
- **
- **  Revision 1.63  2006/06/04 12:26:50  jhense
- **  Throwing FireCamLostDMAPacketError when dma_single_capture fails.
- **
- **  Revision 1.62  2006/05/26 13:37:20  jhense
- **  Amendment.
- **
- **  Revision 1.61  2006/05/26 13:09:07  jhense
- **  For different video1394-device handling: Also looks for /dev/video1394-<bus-no>
- **
- **  Revision 1.60  2006/05/21 01:24:36  mechnich
- **  included assert.h
- **
- **  Revision 1.59  2006/05/19 10:49:50  jhense
- **  Assertion for negative framestarts.
- **
- **  Revision 1.58  2006/05/04 07:16:05  jhense
- **  DMA capture in non-smp kernel now possible.
- **
- **  Revision 1.57  2006/04/28 11:04:28  jhense
- **  Check if smp-kernel is present. For smp's only DMA-capture is allowed, for
- **  non-smp's only raw-capture.
- **
- **  Revision 1.56  2006/04/27 13:19:57  jhense
- **  stopCamera doesn't take care if sequenceFeature is running.
- **  This MUST be stopped by application.
- **
- **  Revision 1.55  2006/04/20 11:40:29  jhense
- **  Typo correction.
- **
- **  Revision 1.54  2006/04/20 11:34:33  jhense
- **  Debugging output as decimal.
- **
- **  Revision 1.53  2006/04/19 09:03:11  jhense
- **  Resuming that camera-parameter DMA is not always present.
- **
- **  Revision 1.52  2006/04/07 08:44:43  jhense
- **  *** empty log message ***
- **
- **  Revision 1.51  2006/04/05 14:56:30  jhense
- **  FireCam is initialized with Timebase = 100us. Start and stop of sequence-feature
- **  improved.
- ** 
- **  Revision 1.50  2006/04/01 11:15:13  jhense
- **  Shutdown of sequence feature improved.
- **
- **  Revision 1.49  2006/03/09 14:55:32  jhense
- **  New function measureRelativeStarttimes to get the timing of a
- **  sequence.
- **
- **  Revision 1.48  2006/02/03 09:30:47  jhense
- **  New function "getRelativeFrameStarttimes" added, where camera measures the
- **  end of exposure = frame start. This cannot be retrieved when using non-dma.
- **
- **  Revision 1.47  2006/01/11 16:07:43  jhense
- **  Added feature to allocate a ringbuffer in application and set it as 
- **  camera-ringbuffer: setExternalRingbuffer
- **  Start and end of transmission can be read with getFrameStarttime and getFrameFilltime
- **
- **  Revision 1.46  2005/12/23 10:53:17  jhense
- **  New function dmaGetNextFreeFrame added. The grabbing-thread for dma is deactivated.
- **
- **  Revision 1.45  2005/12/14 16:11:25  jhense
- **  Additional functions: applySettingsToSequenceRegister and selectSequenceRegister 
- **  for better support of Sequence-Feature.
- **
- **  Revision 1.44  2005/10/28 12:29:39  jhense
- **  Added functions initSequenceFeature and applyParametersToSequence to support
- **  the AVT-Sequence feature.
- **
- **  Revision 1.43  2005/02/01 11:02:47  ronneber
- **  - fixed typo
- **
- **  Revision 1.42  2005/02/01 11:00:52  ronneber
- **  - fixed timing problems in stopCamera(): now first stops recieving
- **    thread and then stops camera
- **
- **  Revision 1.41  2004/12/10 22:58:40  mechnich
- **  - finally enabled dma
- **
- **  Revision 1.40  2004/12/10 12:44:26  mechnich
- **  - fixed segfault that appears if /dev/video1394 does not exist
- **  - set Format7 packet size to maximum if recommended size is 0
- **
- **  Revision 1.39  2004/12/03 09:05:40  ronneber
- **  - fixed several format7 issues in setFramerate(), testSettings() and
- **    testFormat7PacketSize -- default behaviour is now to write a warning
- **    for wrong parameters (e.g. too big image sizes), but correct them
- **    automatically
- **  - added severals initializations to zero to mke valgrind happy
- **  - corrected return value in setMode()
- **
- **  Revision 1.38  2004/11/05 03:42:46  mechnich
- **  In startCamera(): after camera setup, set all volatile feature values
- **
- **  Revision 1.37  2004/10/19 06:40:16  mechnich
- **  adapted interface to libdc1394 1.0
- **
- **  Revision 1.36  2004/10/19 05:54:46  mechnich
- **  added DMA stuff without testing, will probably need future fixes; added absolute control features
- **
- **  Revision 1.35  2004/06/14 16:36:27  mechnich
- **  works with libdc1394 v0.9.4 now
- **
- **  Revision 1.34  2004/06/06 17:03:21  mechnich
- **  *** empty log message ***
- **
- **  Revision 1.33  2004/02/23 13:44:44  mechnich
- **  rearranged code for valgrind
- **
- **  Revision 1.32  2004/02/22 00:18:27  mechnich
- **  replaced mutex locks/unlocks by MutexLocker objects
- **
- **  Revision 1.31  2004/02/20 23:40:25  mechnich
- **  replaced ordinary mutex locks and unlocks by creation of a MutexLocker object
- **
- **  Revision 1.30  2003/12/18 15:34:33  mechnich
- **  changed return value of bytePerPixel from float to double
- **
- **  Revision 1.29  2003/12/02 18:24:12  mechnich
- **  fixed segfault in stopCamera()
- **
- **  Revision 1.28  2003/12/02 16:34:19  mechnich
- **  fixed segfault while capturing with multiple cameras
- **
- **  Revision 1.27  2003/11/05 16:25:38  mechnich
- **  sync
- **
- **  Revision 1.26  2003/10/06 16:12:59  mechnich
- **  slightly modified grabber function
- **
- **  Revision 1.25  2003/10/05 19:34:32  mechnich
- **  - removed commented source code
- **  - removed debugging output
- **  - added mutex lock in stopCamera()
- **
- **  Revision 1.24  2003/10/01 13:31:18  pigorsch
- **  - added parameter channel to constructor
- **  - replaced parameter p_node by p_channel in setup_capture calls
- **  - added parameter camera to method grabberThreadStartFunction
- **  - use FireCam pointer determined by handle and channel in IsoHandler instead of p_handlerObject
- **
- **  Revision 1.23  2003/09/19 14:39:03  mechnich
- **  - corrected error in mode initialization
- **  - changed handling of Format7 image geometry controls
- **
- **  Revision 1.22  2003/08/05 14:39:18  mechnich
- **  corrected errors in Format7 functionalities
- **
- **  Revision 1.21  2003/07/03 15:25:17  mechnich
- **  - added comments
- **  - improved Format7 capabilities
- **  - added boolean return values to set...() functions
- **
- **  Revision 1.20  2003/06/12 16:13:19  mechnich
- **  added comments
- **
- **  Revision 1.19  2003/05/22 08:29:46  mechnich
- **  - minor bugfixes
- **  - introduced parameterMap()
- **
- **  Revision 1.18  2003/05/21 14:59:09  mechnich
- **  - introduced setColorCoding() function
- **  - completed reading of already set camera features at startup
- **  - completed framerate setting and reading
- **
- **  Revision 1.17  2003/05/21 09:00:47  mechnich
- **  removed superfluent functions and added missing to LMBCam
- **
- **  Revision 1.16  2003/05/12 15:42:45  mechnich
- **  - camera settings are now loaded at startup
- **  - framedropping set as default
- **  - improved format7 compatibility
- **  - added functions nComponents(), bytePerPixel() and isCompressed() to the interface
- **
- **  Revision 1.15  2003/05/09 13:29:58  ronneber
- **  - startCamera() now does a restart, when camera is already running
- **
- **  Revision 1.14  2003/05/08 13:16:23  ronneber
- **  - removed mutex attributes in startCamera()
- **
- **  Revision 1.13  2003/05/07 11:47:54  ronneber
- **  - made compilable with g++-2.95
- **
- **  Revision 1.12  2003/05/07 00:06:28  mechnich
- **  intorduced a wrapper mutex for critical libraw1394 functions,
- **  liblmbcam should now be completely thread safe
- **
- **  Revision 1.11  2003/05/06 23:05:39  mechnich
- **  - increased thread safety of library
- **  - restructured parameter classes, introduced new subclasses to LMBCamParam:
- **    LMBCamParamIntRange and LMBCamParamSwitch
- **    TODO: add LMBCamParamDoubleRange for absolute features
- **
- **  Revision 1.10  2003/05/05 02:36:37  mechnich
- **  temporarily removed locking and unlocking of the frame mutexes in the
- **  handler thread to prevent applications from deadlocking
- **
- **  Revision 1.9  2003/04/24 17:02:26  mechnich
- **  - added return value to setMode() and setFramerate()
- **  - added full functionality to recently added functions
- **
- **  Revision 1.8  2003/04/23 13:28:52  mechnich
- **  - fixed parameter queries for all tested cameras
- **  - fixed bug in iso handler function
- **  - moved p_cameraIsRunning with affiliated functions to LMBCam
- **
- **  Revision 1.7  2003/04/17 01:15:03  mechnich
- **  - removed frame mutexes
- **  - fixed bug in stopCamera()
- **
- **  Revision 1.6  2003/04/16 16:41:26  mechnich
- **  added threaded framegrabber for non-DMA mode
- **
- **  Revision 1.5  2003/01/20 10:22:24  mechnich
- **  *** empty log message ***
- **
- **  Revision 1.4  2003/01/03 16:23:12  mechnich
- **  corrected minor bugs
- **
- **  Revision 1.3  2002/12/11 04:21:21  mechnich
- **  made non-dma mode the default
- **  adapted parameter handling for dma accordingly
- **
- **  Revision 1.2  2002/12/10 02:42:06  mechnich
- **  added dma related functions in LMBCam
- **  fixed bugs with PYRO WEBCAM API-200
- **
- **  Revision 1.1  2002/12/04 13:17:46  mechnich
- **  initial revision
- **
- **
- **
- **************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
-/*-------------------------------------------------------------------------
- *  Own includes
- *-------------------------------------------------------------------------*/
 #include "FireCam.hh"
+
 #include "FireCamParam.hh"
 #include "FireCamBus.hh"
 #include "FireCamBusRegistry.hh"
 
-/*-------------------------------------------------------------------------
- *  C includes
- *-------------------------------------------------------------------------*/
 #include <cstdio>
 #include <pthread.h>
 #include <stdlib.h>
 #include <assert.h>
 
 #if defined LIBLMBCAMDEBUG
+#include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #endif
@@ -302,9 +43,6 @@ std::map<int,int> liblmbcam::FireCam::p_speeds;
 std::map<double,liblmbcam::FireCam::Framerate> liblmbcam::FireCam::p_framerates;
 std::map<std::string,liblmbcam::FireCam::Mode> liblmbcam::FireCam::p_modes;
 std::map<int,int> liblmbcam::FireCam::p_triggerModes;
-
-//liblmbcam::FireCam::GrabberStatus liblmbcam::FireCam::p_grabberStatus = INIT;
-//liblmbcam::FireCam* liblmbcam::FireCam::p_handlerObject = 0;
 
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:FireCam::FireCam( raw1394handle_t handle,
@@ -420,14 +158,6 @@ liblmbcam::FireCam::FireCam( raw1394handle_t handle, nodeid_t node,
     p_deviceName = "";
   }
 
-
-  /*-----------------------------------------------------------------------
-   *  Initialize mutexes and conditionals
-   *-----------------------------------------------------------------------*/
-  pthread_cond_init( &p_frameStartCond, NULL);
-  pthread_mutex_init( &p_frameStartMutex, NULL);
-  pthread_cond_init( &p_frameFinishCond, NULL);
-  pthread_mutex_init( &p_frameFinishMutex, NULL);
 
   /*-----------------------------------------------------------------------
    *  Set timebase to 100us -- quick hack
@@ -2773,16 +2503,3 @@ std::vector<timeval> liblmbcam::FireCam::measureRelativeFrameStarttimes(int no)
   return vResult;
   
 }
-
-  
-/*=========================================================================
- *  DESCRIPTION OF FUNCTION:
- *  ==> see headerfile
- *=======================================================================*/
-void liblmbcam::FireCam::getFrameStartMutex(pthread_mutex_t** mut, 
-                                            pthread_cond_t** cond)
-{
-    *cond = &p_frameStartCond;
-  *mut = &p_frameStartMutex;
-}
-

@@ -1,41 +1,25 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: LMBErrorHandler.cc,v $
-**   $Revision: 1.5 $$Name:  $
-**       $Date: 2004/02/20 22:37:54 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: LMBErrorHandler.cc,v $
-**  Revision 1.5  2004/02/20 22:37:54  mechnich
-**  added MutexLocker class
-**
-**  Revision 1.4  2003/12/02 16:35:46  mechnich
-**  just for maintenance
-**
-**  Revision 1.3  2003/06/12 16:13:19  mechnich
-**  added comments
-**
-**  Revision 1.2  2003/05/08 07:54:24  ronneber
-**  - made handle() a member template, otherwise only objects of class
-**    LMBError were thrown
-**
-**  Revision 1.1  2002/12/04 13:17:46  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "LMBErrorHandler.hh"
 
-liblmbcam::LMBErrorHandler* liblmbcam::LMBErrorHandler::p_errorHandler=0;
+liblmbcam::LMBErrorHandler*
+liblmbcam::LMBErrorHandler::p_errorHandler=0;
 
-pthread_mutex_t liblmbcam::LMBErrorHandler::p_mutex=PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t
+liblmbcam::LMBErrorHandler::p_mutex=PTHREAD_MUTEX_INITIALIZER;
 
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:LMBErrorHandler::LMBErrorHandler()

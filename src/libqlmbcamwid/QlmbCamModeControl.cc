@@ -1,35 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: QlmbCamModeControl.cc,v $
-**   $Revision: 1.5 $$Name:  $
-**       $Date: 2004/12/03 09:13:53 $
-**   Copyright: GPL $Author: ronneber $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: QlmbCamModeControl.cc,v $
-**  Revision 1.5  2004/12/03 09:13:53  ronneber
-**  - updateFormat7Controls() now displays actual framerate of camera
-**
-**  Revision 1.4  2003/09/19 14:39:42  mechnich
-**  - changed handling of Format7 image geometry controls
-**
-**  Revision 1.3  2003/08/12 16:58:58  mechnich
-**  replaced STL strings by c-style strings in conjunction with Qt functions
-**  for compatibility reasons
-**
-**  Revision 1.2  2003/08/05 15:35:54  mechnich
-**  added lineedits for Format7 image position and changed layout
-**
-**  Revision 1.1  2003/05/22 08:25:56  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "QlmbCamModeControl.hh"
 

@@ -13,57 +13,49 @@
 // You should have received a copy of the GNU General Public License
 // along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef ATOMICCOUNTER_HH
-#define ATOMICCOUNTER_HH
+#ifndef V4LCAMBUS_HH
+#define V4LCAMBUS_HH
 
-#include "MutexLocker.hh"
+#include "LMBCamBus.hh"
+#include "LMBErrorHandler.hh"
+#include "V4LCam.hh"
+#include "V4LCamError.hh"
 
+#include <vector>
+#include <sstream>
+
+#include <pthread.h>
+
+namespace liblmbcam
+{
 /*======================================================================*/
 /*!
- *  \class AtomicCounter AtomicCounter.hh
- *  \brief The AtomicCounter template class provides a simple way of
- *         making a counting variable thread safe.
+ *  \class V4LCamBus V4LCamBus.hh
+ *  \brief The V4LCamBus class represents a V4L2 bus which allows
+ *         access to connected cameras.
  *
- *  (description)
+ *  
  */
 /*======================================================================*/
-template<typename T>
-class AtomicCounter
+class V4LCamBus : public LMBCamBus
 {
 public:
-  AtomicCounter();
+  V4LCamBus();
+  ~V4LCamBus();
   
-  AtomicCounter( T value);
+  void rescan();
+  unsigned int nCameras() const;
+  LMBCam* cameraByIndex( unsigned int index) const;
+  LMBCam* cameraByGUID( const std::string& guid) const;
   
-  ~AtomicCounter();
-
-  T operator++();
-  
-  T operator++(int);
-  
-  T operator--();
-  
-  T operator--(int);
-  
-  T operator+=( T change);
-  
-  T operator-=(T change);
-  
-  T operator+(T change);
-  
-  T operator-(T change);
-  
-  T operator=( T value);
-
-  operator T() const;  
-
-  bool operator!();
-
 private:
-  T p_counter;
-  mutable pthread_mutex_t p_lock;
+  V4LCamBus( const V4LCamBus&);
+  void operator=( const V4LCamBus&);
+  
+  void clearCameras();
+  
+  std::vector<V4LCam*> p_cameras;
 };
-
-#include "AtomicCounter.icc"
+}
 
 #endif

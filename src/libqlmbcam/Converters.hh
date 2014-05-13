@@ -1,29 +1,20 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: Bayer.hh,v $
-**   $Revision: 1.1 $$Name:  $
-**       $Date: 2003/10/06 13:43:37 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: Bayer.hh,v $
-**  Revision 1.1  2003/10/06 13:43:37  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
-/*-------------------------------------------------------------------------
- * Taken from coriander-0.27.1, src/conversion.h  
- *-------------------------------------------------------------------------*/
-
-#ifndef BAYER_HH
-#define BAYER_HH
+#ifndef CONVERTERS_HH
+#define CONVERTERS_HH
 
 namespace libqlmbcam
 {
@@ -69,6 +60,15 @@ namespace libqlmbcam
   void StereoDecode(unsigned char *src,
                     unsigned char *dest,
                     int NumPixels);
+
+  void ConvertYUV420( unsigned char *src,
+                      unsigned char *dest,
+                      unsigned int sx, unsigned int sy);
+  void ConvertYVU420( unsigned char *src,
+                      unsigned char *dest,
+                      unsigned int sx, unsigned int sy);
+  void ConvertJPEG( unsigned char* src, unsigned int nbytes,
+                    unsigned char* dest);
 }
 
 #endif

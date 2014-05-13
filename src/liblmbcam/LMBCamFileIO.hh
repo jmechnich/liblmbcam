@@ -1,34 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: LMBCamFileIO.hh,v $
-**   $Revision: 1.5 $$Name:  $
-**       $Date: 2004/05/28 12:16:27 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: LMBCamFileIO.hh,v $
-**  Revision 1.5  2004/05/28 12:16:27  mechnich
-**  changed available image formats tp ppm/pgm
-**
-**  Revision 1.4  2003/12/18 15:33:19  mechnich
-**  sync
-**
-**  Revision 1.3  2003/12/02 16:35:46  mechnich
-**  just for maintenance
-**
-**  Revision 1.2  2003/11/05 16:57:49  mechnich
-**  corrected dumb error
-**
-**  Revision 1.1  2003/11/05 16:22:07  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef LMBCAMFILEIO_HH
 #define LMBCAMFILEIO_HH

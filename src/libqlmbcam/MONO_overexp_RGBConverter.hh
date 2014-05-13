@@ -1,32 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: MONO_overexp_RGBConverter.hh,v $
-**   $Revision: 1.4 $$Name:  $
-**       $Date: 2005/07/14 09:36:35 $
-**   Copyright: GPL $Author: tschmidt $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: MONO_overexp_RGBConverter.hh,v $
-**  Revision 1.4  2005/07/14 09:36:35  tschmidt
-**  - added SubSampling capabilities
-**
-**  Revision 1.3  2005/02/28 00:13:19  mechnich
-**  added subdir scripts Makefile.am
-**
-**  Revision 1.2  2005/02/25 19:26:11  mechnich
-**  - derive from PixelConverter class
-**  - changed fucntion names
-**
-**  Revision 1.1  2004/12/14 10:30:38  ronneber
-**  - initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef MONO_OVEREXP_RGBCONVERTER_HH
 #define MONO_OVEREXP_RGBCONVERTER_HH

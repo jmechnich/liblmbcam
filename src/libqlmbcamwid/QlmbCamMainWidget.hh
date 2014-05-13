@@ -1,52 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: QlmbCamMainWidget.hh,v $
-**   $Revision: 1.11 $$Name:  $
-**       $Date: 2005/02/28 00:12:09 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: QlmbCamMainWidget.hh,v $
-**  Revision 1.11  2005/02/28 00:12:09  mechnich
-**  changed include path for libfidwid headers
-**
-**  Revision 1.10  2005/02/25 19:18:32  mechnich
-**  don't use namespace liblmbcam
-**
-**  Revision 1.9  2004/02/06 13:41:04  mechnich
-**  changed include paths
-**
-**  Revision 1.8  2004/01/27 21:51:30  mechnich
-**  use PixelConverter from libfidwid
-**
-**  Revision 1.7  2004/01/27 03:59:04  mechnich
-**  corrected install path
-**
-**  Revision 1.6  2003/08/05 15:35:54  mechnich
-**  added lineedits for Format7 image position and changed layout
-**
-**  Revision 1.5  2003/05/22 16:28:28  ronneber
-**  - added Menu entry for control widget
-**
-**  Revision 1.4  2003/05/22 08:30:30  mechnich
-**  - added slots for changeing video moder and framerate
-**
-**  Revision 1.3  2003/05/21 14:54:49  mechnich
-**  ssetting framerates allows rounding now
-**
-**  Revision 1.2  2003/05/21 08:59:31  mechnich
-**  added includes
-**
-**  Revision 1.1  2003/05/12 17:19:17  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef QLMBCAMMAINWIDGET_HH
 #define QLMBCAMMAINWIDGET_HH
@@ -122,12 +87,15 @@ private:
   unsigned char* p_data;
   
   static YUV411_RGBConverter YUV411Conv;
-  static YUV422_RGBConverter YUV422Conv;
+  static UYVY_RGBConverter   UYVYConv;
+  static YUYV_RGBConverter   YUYVConv;
+  static VYUY_RGBConverter   VYUYConv;
+  static YVYU_RGBConverter   YVYUConv;
   static YUV444_RGBConverter YUV444Conv;
-  static MONO_RGBConverter MONOConv;
+  static MONO_RGBConverter   MONOConv;
   static MONO16_RGBConverter MONO16Conv;
-  static RGB_RGBConverter RGBConv;
-  static RGB16_RGBConverter RGB16Conv;
+  static RGB_RGBConverter    RGBConv;
+  static RGB16_RGBConverter  RGB16Conv;
   
 };
 

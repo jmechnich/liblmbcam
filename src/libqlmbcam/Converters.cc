@@ -1,3 +1,30 @@
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
+
+#include "Converters.hh"
+
+#include <PixelConverter.hh>
+
+#include <cstdlib>
+#include <cstdio>
+#include <string>
+
+#ifdef HAVE_LIBJPEG
+#include <jpeglib.h>
+#endif
+
 /*-------------------------------------------------------------------------
  * Taken from coriander-0.27.1, src/conversion.c 
  *-------------------------------------------------------------------------*/
@@ -9,12 +36,6 @@
  * http://ise0.Stanford.EDU/~tingchen/main.htm                  *
  * and have been converted from Matlab to C                     *
  ****************************************************************/
-
-#include "Bayer.hh"
-
-#include <cstdlib>
-#include <cstdio>
-#include <string>
 
 #define CLIP(in, out)\
 {\
@@ -485,3 +506,110 @@ libqlmbcam::StereoDecode( unsigned char *src,
     dest[j--] = src[i--];
   }
 }
+
+void
+libqlmbcam::ConvertYUV420( unsigned char *src, unsigned char *dest,
+                           unsigned int width, unsigned int height)
+{
+  unsigned char r,g,b,Y,Cr,Cb;
+  
+  size_t p1,p2,p3,p4;
+  int Cr_start = width*height;
+  int Cb_start = Cr_start + (width*height/4);
+  
+  for (size_t y=0;y<height;y++)
+  {
+    for (size_t x=0;x<width;x++)
+    {
+      p1=(y*width) + (x);
+      p2=((y/2)*width/2) + (x/2) + Cr_start;
+      p3=((y/2)*width/2) + (x/2) + Cb_start;
+      p4=(y*width*3) + (x*3);
+      
+      Y=src[p1];
+      Cr=src[p2];
+      Cb=src[p3];
+      yuv2rgb (Y,Cr,Cb,&r,&g,&b);
+      
+      dest[p4]=r;
+      dest[p4+1]=g;
+      dest[p4+2]=b;
+    }
+  }
+}
+
+void
+libqlmbcam::ConvertYVU420( unsigned char *src, unsigned char *dest,
+                           unsigned int width, unsigned int height)
+{
+  unsigned char r,g,b,Y,Cr,Cb;
+  
+  size_t p1,p2,p3,p4;
+  int Cb_start = width*height;
+  int Cr_start = Cb_start + (width*height/4);
+  
+  for (size_t y=0;y<height;y++)
+  {
+    for (size_t x=0;x<width;x++)
+    {
+      p1=(y*width) + (x);
+      p2=((y/2)*width/2) + (x/2) + Cr_start;
+      p3=((y/2)*width/2) + (x/2) + Cb_start;
+      p4=(y*width*3) + (x*3);
+      
+      Y=src[p1];
+      Cr=src[p2];
+      Cb=src[p3];
+      yuv2rgb (Y,Cr,Cb,&r,&g,&b);
+      
+      dest[p4]=r;
+      dest[p4+1]=g;
+      dest[p4+2]=b;
+    }
+  }
+}
+
+#ifdef HAVE_LIBJPEG
+void
+libqlmbcam::ConvertJPEG( unsigned char* src, unsigned int nbytes,
+                         unsigned char* dst)
+{
+  struct jpeg_decompress_struct cinfo;
+  struct jpeg_error_mgr jerr;
+
+  cinfo.err = jpeg_std_error(&jerr);	
+  jpeg_create_decompress(&cinfo);
+  jpeg_mem_src(&cinfo, src, nbytes);
+  int rc = jpeg_read_header(&cinfo, TRUE);
+  if (rc != 1)
+  {
+    fprintf(stderr, "File does not seem to be a normal JPEG\n");
+    exit(EXIT_FAILURE);
+  }
+  jpeg_start_decompress(&cinfo);
+  size_t width  = cinfo.output_width;
+  size_t row_stride = width * cinfo.output_components;
+  size_t bmp_size = row_stride;
+  unsigned char* bmp_buffer = new unsigned char[bmp_size];
+  unsigned char* buffer_array[1];
+  buffer_array[0] = bmp_buffer;
+  while (cinfo.output_scanline < cinfo.output_height)
+  {
+    jpeg_read_scanlines(&cinfo, buffer_array, 1);
+    unsigned char* pos = buffer_array[0];
+    memcpy( dst, pos, row_stride);
+    dst += row_stride;
+  }
+  delete[] bmp_buffer;
+  
+  jpeg_finish_decompress(&cinfo);
+  jpeg_destroy_decompress(&cinfo);
+}
+#else
+void
+libqlmbcam::ConvertJPEG( unsigned char* src, unsigned int nbytes,
+                         unsigned char* dst)
+{
+  std::cout << "libjpeg not available" << std::endl;
+}
+#endif

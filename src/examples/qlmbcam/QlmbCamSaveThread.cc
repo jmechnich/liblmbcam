@@ -1,34 +1,20 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: QlmbCamSaveThread.cc,v $
-**   $Revision: 1.4 $$Name:  $
-**       $Date: 2005/05/23 07:41:30 $
-**   Copyright: GPL $Author: ckeller $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: QlmbCamSaveThread.cc,v $
-**  Revision 1.4  2005/05/23 07:41:30  ckeller
-**  Added progress bars
-**
-**  Revision 1.3  2005/05/10 20:57:30  ckeller
-**  Added progress bar
-**
-**  Revision 1.2  2005/05/04 12:09:05  ckeller
-**  Now using thread to save images
-**
-**  Revision 1.1  2005/05/03 18:53:36  ckeller
-**  initial version
-**
-**  Revision 1.1  2001/04/27 13:44:19  ckeller
-**  initial revision
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
+
 #include "QlmbCamSaveThread.hh"
+
 #include <string>
 #include <sstream>
 #include <fstream>

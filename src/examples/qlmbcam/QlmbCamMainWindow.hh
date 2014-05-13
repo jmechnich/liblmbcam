@@ -1,42 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: QlmbCamMainWindow.hh,v $
-**   $Revision: 1.7 $$Name:  $
-**       $Date: 2005/05/10 20:57:30 $
-**   Copyright: GPL $Author: ckeller $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: QlmbCamMainWindow.hh,v $
-**  Revision 1.7  2005/05/10 20:57:30  ckeller
-**  Added progress bar
-**
-**  Revision 1.6  2005/05/04 14:47:49  ckeller
-**  added some checks if still saving
-**
-**  Revision 1.5  2005/05/04 12:09:05  ckeller
-**  Now using thread to save images
-**
-**  Revision 1.4  2005/05/03 14:22:53  ckeller
-**  added support for grabbing image series
-**
-**  Revision 1.3  2003/10/07 05:19:41  mechnich
-**  - added menu bat
-**  - added grab button and functions
-**
-**  Revision 1.2  2003/10/06 14:01:50  mechnich
-**  - added rescanBus() function
-**  - changed calls of static QMessageBox functions for Qt backward compatibility
-**
-**  Revision 1.1  2003/10/05 19:30:34  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef QLMBCAMMAINWINDOW_HH
 #define QLMBCAMMAINWINDOW_HH
@@ -60,8 +35,6 @@
 using namespace liblmbcam;
 using namespace libqlmbcam;
 
-
-  
 class QlmbCamMainWindow : public QWidget
 {
   Q_OBJECT

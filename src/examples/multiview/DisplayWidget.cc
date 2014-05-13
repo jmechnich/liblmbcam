@@ -1,32 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: DisplayWidget.cc,v $
-**   $Revision: 1.4 $$Name:  $
-**       $Date: 2005/02/28 00:21:07 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: DisplayWidget.cc,v $
-**  Revision 1.4  2005/02/28 00:21:07  mechnich
-**  adapted to new libfidwid interface
-**
-**  Revision 1.3  2004/10/19 05:49:11  mechnich
-**  changed LMBError interface
-**
-**  Revision 1.2  2004/01/27 03:59:04  mechnich
-**  corrected install path
-**
-**  Revision 1.1  2003/10/01 13:41:43  pigorsch
-**  - initial revision
-**
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QApplication>
 #include <QCursor>
@@ -39,12 +24,15 @@
 #include <ctime>
 
 YUV411_RGBConverter DisplayWidget::YUV411Conv;
-YUV422_RGBConverter DisplayWidget::YUV422Conv;
+YUYV_RGBConverter   DisplayWidget::YUYVConv;
+UYVY_RGBConverter   DisplayWidget::UYVYConv;
+YVYU_RGBConverter   DisplayWidget::YVYUConv;
+VYUY_RGBConverter   DisplayWidget::VYUYConv;
 YUV444_RGBConverter DisplayWidget::YUV444Conv;
-MONO_RGBConverter DisplayWidget::MONOConv;
+MONO_RGBConverter   DisplayWidget::MONOConv;
 MONO16_RGBConverter DisplayWidget::MONO16Conv;
-RGB_RGBConverter DisplayWidget::RGBConv;
-RGB16_RGBConverter DisplayWidget::RGB16Conv;
+RGB_RGBConverter    DisplayWidget::RGBConv;
+RGB16_RGBConverter  DisplayWidget::RGB16Conv;
 
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:
@@ -124,10 +112,26 @@ DisplayWidget::updateImage()
           p_fidWidget->setImagePerLine( p_data,
                                         YUV411Conv);
         }
-        else if( colorcoding == "YUV422")
+        else if( colorcoding == "YUV422" |
+                 colorcoding == "UYVY")
         {
           p_fidWidget->setImagePerLine( p_data,
-                                        YUV422Conv);
+                                        UYVYConv);
+        }
+        else if( colorcoding == "VYUY")
+        {
+          p_fidWidget->setImagePerLine( p_data,
+                                        VYUYConv);
+        }
+        else if( colorcoding == "YUYV")
+        {
+          p_fidWidget->setImagePerLine( p_data,
+                                        YUYVConv);
+        }
+        else if( colorcoding == "YVYU")
+        {
+          p_fidWidget->setImagePerLine( p_data,
+                                        YVYUConv);
         }
         else if( colorcoding == "YUV444")
         {

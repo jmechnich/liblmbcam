@@ -1,22 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: MutexLocker.hh,v $
-**   $Revision: 1.1 $$Name:  $
-**       $Date: 2004/02/20 22:37:24 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: MutexLocker.hh,v $
-**  Revision 1.1  2004/02/20 22:37:24  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef MUTEXLOCKER_HH
 #define MUTEXLOCKER_HH

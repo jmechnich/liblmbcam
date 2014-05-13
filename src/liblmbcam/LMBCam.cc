@@ -1,109 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: LMBCam.cc,v $
-**   $Revision: 1.12 $$Name:  $
-**       $Date: 2006/07/13 12:51:57 $
-**   Copyright: GPL $Author: jhense $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: LMBCam.cc,v $
-**  Revision 1.12  2006/07/13 12:51:57  jhense
-**  Added new interface getFrameStartMutex(). Other threads can be notified, when
-**  frame transmission started.
-**
-**  Revision 1.11  2006/03/09 14:55:32  jhense
-**  New function measureRelativeStarttimes to get the timing of a
-**  sequence.
-**
-**  Revision 1.10  2005/12/14 16:11:25  jhense
-**  Additional functions: applySettingsToSequenceRegister and selectSequenceRegister for better support of Sequence-Feature.
-**
-**  Revision 1.9  2005/10/28 12:41:46  jhense
-**  SUBDIRS = etc scripts
-**
-**  AM_CXXFLAGS = -Wall -g -O2 -D_REENTRANT -DLIBLMBCAMDEBUG
-**
-**  lib_LTLIBRARIES = liblmbcam.la
-**
-**  liblmbcam_la_LDFLAGS = -version-info @lt_major@:@lt_revision@:@lt_age@
-**  liblmbcam_la_LIBADD = -ldc1394_control -lraw1394 -lpthread
-**
-**  liblmbcam_la_SOURCES =	FileCam.cc \
-**  			FireCam.cc \
-**  			FireCamBusRegistry.cc \
-**  			FireCamBus.cc \
-**  			FireCamParam.cc \
-**  			LMBCam.cc \
-**  			LMBCamBusIndex.cc \
-**  			LMBCamFileIO.cc \
-**  			LMBErrorHandler.cc
-**  #			V4LCam.cc \
-**  #			V4LCamBus.cc \
-**  #			V4LCamParam.cc
-**
-**  pkginclude_HEADERS =	AtomicCounter.hh \
-**  			AtomicCounter.icc \
-**  			FileCam.hh \
-**  			FileCam.icc \
-**  			FileCamError.hh \
-**  			FireCam.hh \
-**  			FireCam.icc \
-**  			FireCamBusRegistry.hh \
-**  			FireCamBus.hh \
-**  			FireCamBus.icc \
-**  			FireCamError.hh \
-**  			FireCamParam.hh \
-**  			FireCamParam.icc \
-**  			LMBCam.hh \
-**  			LMBCam.icc \
-**  			LMBCamBus.hh \
-**  			LMBCamBusIndex.hh \
-**  			LMBCamError.hh \
-**  			LMBCamFileIO.hh \
-**  			LMBCamParam.hh \
-**  			LMBError.hh \
-**  			LMBErrorHandler.hh \
-**  			MutexLocker.hh
-**  #			V4LCam.hh \
-**  #			V4LCam.icc \
-**  #			V4LCamBus.hh \
-**  #			V4LCamBus.icc \
-**  #			V4LCamError.hh \
-**  #			V4LCamParam.hh \
-**  #			V4LCamParam.icc
-**
-**  Revision 1.8  2004/12/03 09:09:00  ronneber
-**  - fixed order in loadParametersFromMap(). Now framerate in format7
-**    works correctly
-**
-**  Revision 1.7  2004/11/05 15:49:40  mechnich
-**  fixed bug with std::string::substr()
-**
-**  Revision 1.6  2004/10/19 05:54:46  mechnich
-**  added DMA stuff without testing, will probably need future fixes; added absolute control features
-**
-**  Revision 1.5  2004/05/28 12:09:00  mechnich
-**  added extended parameters
-**
-**  Revision 1.4  2004/05/09 17:03:59  mechnich
-**  corrected errors in saveParametersToMap()
-**
-**  Revision 1.3  2004/05/09 16:26:11  mechnich
-**  added saveParametersToMap() ( after adding loadParametersFromMap())
-**
-**  Revision 1.2  2004/05/09 16:02:04  mechnich
-**  added loadParameterMap() function
-**
-**  Revision 1.1  2003/10/05 19:30:02  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "LMBCam.hh"
 
@@ -233,7 +141,8 @@ liblmbcam::LMBCam::readState( std::istream& is)
     }
     else if( buf == "<CamParam")
     {
-      is >> eatWsAndComments >> buf;
+      is >> eatWsAndComments;
+      std::getline(is,buf);
       buf = buf.substr( 5);
       
       LMBCamParam* parameter = param( buf);
@@ -497,6 +406,19 @@ liblmbcam::LMBCam::saveParametersToMap(
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
  *=======================================================================*/
-void liblmbcam::LMBCam::getFrameStartMutex(pthread_mutex_t**, pthread_cond_t**)
-{}
+void liblmbcam::LMBCam::getFrameStartMutex( pthread_mutex_t** m, 
+                                            pthread_cond_t**  c)
+{
+  *c = &p_frameStartCond;
+  *m = &p_frameStartMutex;
+}
 
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+size_t
+liblmbcam::LMBCam::bytesUsed( long frameIndex) const
+{
+  return width()*height()*bytePerPixel();
+}

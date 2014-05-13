@@ -1,38 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: LMBCamML.hh,v $
-**   $Revision: 1.6 $$Name:  $
-**       $Date: 2004/10/19 06:17:00 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: LMBCamML.hh,v $
-**  Revision 1.6  2004/10/19 06:17:00  mechnich
-**  *** empty log message ***
-**
-**  Revision 1.5  2004/03/22 15:46:04  ronneber
-**  - just some debugging output
-**
-**  Revision 1.4  2003/11/26 16:38:14  ronneber
-**  - extended to multi component images (not ready yet)
-**
-**  Revision 1.3  2003/05/22 16:29:39  ronneber
-**  - improved  GUIThread to use less process time
-**
-**  Revision 1.2  2003/05/16 12:22:17  ronneber
-**  - guithread does not call updateImage() twice for the same image
-**  - extended printActualParametersML()
-**
-**  Revision 1.1  2003/05/13 09:33:56  ronneber
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 // remove matlab's stupid printf definition
 #ifdef printf
@@ -41,9 +20,9 @@
 
 #include <unistd.h> // usleep
 
-#include <qapplication.h>
+#include <QApplication>
 #include <pthread.h>
-#include <qpushbutton.h>
+#include <QPushButton>
 
 #include <QlmbCamMainWidget.hh>
 

@@ -1,61 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: QlmbCamMainWidget.cc,v $
-**   $Revision: 1.14 $$Name:  $
-**       $Date: 2005/02/25 19:15:16 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: QlmbCamMainWidget.cc,v $
-**  Revision 1.14  2005/02/25 19:15:16  mechnich
-**  adapted to new interface of setImagePerLine()
-**
-**  Revision 1.13  2004/10/19 05:48:18  mechnich
-**  changed LMBError interface
-**
-**  Revision 1.12  2004/01/27 21:51:30  mechnich
-**  use PixelConverter from libfidwid
-**
-**  Revision 1.11  2003/10/10 15:12:25  mechnich
-**  added try-catch constructions
-**
-**  Revision 1.10  2003/10/01 15:34:49  mechnich
-**  reduced system load
-**
-**  Revision 1.9  2003/09/19 14:39:42  mechnich
-**  - changed handling of Format7 image geometry controls
-**
-**  Revision 1.8  2003/08/05 15:35:54  mechnich
-**  added lineedits for Format7 image position and changed layout
-**
-**  Revision 1.7  2003/07/03 15:27:36  mechnich
-**  added comments
-**
-**  Revision 1.6  2003/05/22 16:28:19  ronneber
-**  - added Menu entry for control widget
-**
-**  Revision 1.5  2003/05/22 08:30:30  mechnich
-**  - added slots for changeing video moder and framerate
-**
-**  Revision 1.4  2003/05/21 14:54:49  mechnich
-**  ssetting framerates allows rounding now
-**
-**  Revision 1.3  2003/05/21 08:59:31  mechnich
-**  added includes
-**
-**  Revision 1.2  2003/05/16 12:19:57  ronneber
-**  - added missing initializers for p_dropFrames and p_showFPS
-**
-**  Revision 1.1  2003/05/12 17:19:17  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QApplication>
 #include <QStatusBar>
@@ -69,12 +25,14 @@
 #include "QlmbCamMainWidget.hh"
 
 YUV411_RGBConverter QlmbCamMainWidget::YUV411Conv;
-YUV422_RGBConverter QlmbCamMainWidget::YUV422Conv;
-YUV444_RGBConverter QlmbCamMainWidget::YUV444Conv;
-MONO_RGBConverter QlmbCamMainWidget::MONOConv;
+YUYV_RGBConverter   QlmbCamMainWidget::YUYVConv;
+UYVY_RGBConverter   QlmbCamMainWidget::UYVYConv;
+YVYU_RGBConverter   QlmbCamMainWidget::YVYUConv;
+VYUY_RGBConverter   QlmbCamMainWidget::VYUYConv;
+MONO_RGBConverter   QlmbCamMainWidget::MONOConv;
 MONO16_RGBConverter QlmbCamMainWidget::MONO16Conv;
-RGB_RGBConverter QlmbCamMainWidget::RGBConv;
-RGB16_RGBConverter QlmbCamMainWidget::RGB16Conv;
+RGB_RGBConverter    QlmbCamMainWidget::RGBConv;
+RGB16_RGBConverter  QlmbCamMainWidget::RGB16Conv;
 
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:
@@ -369,9 +327,22 @@ QlmbCamMainWidget::updateImage()
           {
             p_fidWidget->setImagePerLine( p_data, YUV411Conv);
           }
-          else if( colorcoding == "YUV422")
+          else if( colorcoding == "YUV422" ||
+                   colorcoding == "UYVY")
           {
-            p_fidWidget->setImagePerLine( p_data, YUV422Conv);
+            p_fidWidget->setImagePerLine( p_data, UYVYConv);
+          }
+          else if( colorcoding == "VYUY")
+          {
+            p_fidWidget->setImagePerLine( p_data, VYUYConv);
+          }
+          else if( colorcoding == "YUYV")
+          {
+            p_fidWidget->setImagePerLine( p_data, YUYVConv);
+          }
+          else if( colorcoding == "YUYV")
+          {
+            p_fidWidget->setImagePerLine( p_data, YUYVConv);
           }
           else if( colorcoding == "YUV444")
           {

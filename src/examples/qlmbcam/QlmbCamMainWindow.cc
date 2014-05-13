@@ -1,59 +1,19 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: QlmbCamMainWindow.cc,v $
-**   $Revision: 1.11 $$Name:  $
-**       $Date: 2005/11/06 18:55:11 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: QlmbCamMainWindow.cc,v $
-**  Revision 1.11  2005/11/06 18:55:11  mechnich
-**  fixed segfault on exit (thanks, Christoph;)
-**
-**  Revision 1.10  2005/05/10 20:57:29  ckeller
-**  Added progress bar
-**
-**  Revision 1.9  2005/05/04 14:47:49  ckeller
-**  added some checks if still saving
-**
-**  Revision 1.8  2005/05/04 12:09:05  ckeller
-**  Now using thread to save images
-**
-**  Revision 1.7  2005/05/03 14:22:53  ckeller
-**  added support for grabbing image series
-**
-**  Revision 1.6  2004/10/19 05:51:14  mechnich
-**  changed LMBError interface; lock certain camera controls (like DMA) while camera is running
-**
-**  Revision 1.5  2003/10/17 22:52:48  mechnich
-**  - added geometric equalizer
-**  - camera in bus widget is selected now when video widget gets focus
-**  - fixed bug in update image
-**
-**  Revision 1.4  2003/10/07 12:56:45  mechnich
-**  replaced calls of QMessageBox::question() by QMessageBox::information()
-**  for qt backward compatibility.
-**
-**  Revision 1.3  2003/10/07 05:19:21  mechnich
-**  - added menu bat
-**  - added grab button and functions
-**
-**  Revision 1.2  2003/10/06 14:01:50  mechnich
-**  - added rescanBus() function
-**  - changed calls of static QMessageBox functions for Qt backward compatibility
-**
-**  Revision 1.1  2003/10/05 19:30:34  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <qfiledialog.h>
+#include <QFileDialog>
 
 #include "QlmbCamMainWindow.hh"
 
@@ -84,7 +44,6 @@ QlmbCamMainWindow::QlmbCamMainWindow( QWidget* parent)
   mainLayout->setSpacing( -1);
 
   QMenuBar* menuBar = new QMenuBar( this);
-
   QMenu *file = new QMenu( "&File", this );
   file->addAction( "&Load camera settings...",
                    this, SLOT( loadSettings()), Qt::CTRL+Qt::Key_L );
@@ -93,7 +52,6 @@ QlmbCamMainWindow::QlmbCamMainWindow( QWidget* parent)
   file->addSeparator();
   file->addAction( "&Quit", qApp, SLOT( quit()), Qt::CTRL+Qt::Key_C );
   menuBar->addMenu( file );
-
   mainLayout->setMenuBar( menuBar);
   
   QHBoxLayout* viewLayout = new QHBoxLayout;
@@ -106,7 +64,6 @@ QlmbCamMainWindow::QlmbCamMainWindow( QWidget* parent)
   _busWidget = new QlmbCamBusWidget( this);
   _busWidget->rescan();
   viewLayout->addWidget( _busWidget);
-  
   connect( _busWidget, SIGNAL( cameraSelectionChanged( liblmbcam::LMBCam*)),
            this, SLOT( setActiveCamera( liblmbcam::LMBCam*)));
   
@@ -126,11 +83,10 @@ QlmbCamMainWindow::QlmbCamMainWindow( QWidget* parent)
   buttonLayout->addStretch();
 
   _startButton = new QPushButton( "Start", this);
-  _stopButton = new QPushButton( "Stop", this);
+  _stopButton  = new QPushButton( "Stop", this);
   _ngrabButton = new QPushButton("Grab",this);
   
 //  _save_progressBar = new QProgressBar("Save Images",this);
-  
   
   _startButton->setEnabled( false);
   _stopButton->setEnabled( false);
@@ -160,6 +116,11 @@ QlmbCamMainWindow::QlmbCamMainWindow( QWidget* parent)
  *=======================================================================*/
 QlmbCamMainWindow::~QlmbCamMainWindow()
 {
+  for( std::map<LMBCam*,QlmbCamVideoWidget*>::iterator it =
+           _videoWindows.begin(); it != _videoWindows.end(); ++it)
+  {
+    delete it->second;    
+  }
   _videoWindows.clear();
 }
 
@@ -229,13 +190,9 @@ QlmbCamMainWindow::loadSettings()
             stopCamera();
             camWasRunning = true;
           }
-          
           _camera->readState( stream);
-
-          if( camWasRunning)
-          {
-            startCamera();
-          }
+          _camWidget->setCamera( _camera);
+          if( camWasRunning) startCamera();
         }
       }
       catch( LMBCamError err)
@@ -255,7 +212,7 @@ QlmbCamMainWindow::saveSettings()
 {
   if( _camera == 0)
   {
-    int ret = QMessageBox::information( this, "Load Settings ...",
+    int ret = QMessageBox::information( this, "Save Settings ...",
                                         "Select a camera first !",
                                         QMessageBox::Ok);
   }
@@ -279,6 +236,7 @@ QlmbCamMainWindow::saveSettings()
 void
 QlmbCamMainWindow::rescanBus()
 {
+  stopCamera();
   for( std::map<LMBCam*,QlmbCamVideoWidget*>::iterator it =
            _videoWindows.begin(); it != _videoWindows.end(); ++it)
   {
@@ -510,17 +468,15 @@ QlmbCamMainWindow::startCamera()
 void
 QlmbCamMainWindow::stopCamera( bool deleteWidget)
 {
+  if(!_camera) return;
+  
   try
   {
     std::map<LMBCam*,QlmbCamVideoWidget*>::iterator it =
         _videoWindows.find( _camera);
     if( it != _videoWindows.end())
     {
-      if( deleteWidget)
-      {
-        delete it->second;
-      }
-      
+      if( deleteWidget) delete it->second;
       _videoWindows.erase( _camera);
     }
           
@@ -566,8 +522,8 @@ QlmbCamMainWindow::removeWidgetAndStopCamera()
         }
         else
         {
-          it->first->stopCamera();
           _videoWindows.erase( it->first);
+          it->first->stopCamera();
           return;
         }
       }

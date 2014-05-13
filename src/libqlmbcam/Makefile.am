@@ -17,7 +17,7 @@ libqlmbcam_la_LDFLAGS = \
 	@QtGui_LIBS@
 
 libqlmbcam_la_SOURCES = \
-	Bayer.cc \
+	Converters.cc \
 	QlmbCamBusWidget.cc \
 	QlmbCamUpdateThread.cc \
 	QlmbCamVideoWidget.cc \
@@ -25,7 +25,7 @@ libqlmbcam_la_SOURCES = \
 	$(MOC_GEN_SOURCES)
 
 libqlmbcaminclude_HEADERS = \
-	Bayer.hh \
+	Converters.hh \
 	Equalizer.hh \
 	QlmbCamBusWidget.hh \
 	QlmbCamUpdateThread.hh \

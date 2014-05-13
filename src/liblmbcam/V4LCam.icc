@@ -1,0 +1,481 @@
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::vendor() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::string
+liblmbcam::V4LCam::vendor() const
+{
+  return p_vendor;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::model() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::string
+liblmbcam::V4LCam::model() const
+{
+  return p_model;
+}
+      
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::guid() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::string
+liblmbcam::V4LCam::guid() const
+{
+  return p_guid;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::guid() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+int
+liblmbcam::V4LCam::handle() const
+{
+  return p_dev;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::left() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::V4LCam::left() const
+{
+  return 0;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::setLeft( unsigned int left)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::V4LCam::setLeft( unsigned int left)
+{
+  return false;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::top() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::V4LCam::top() const
+{
+  return 0;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::setTop( unsigned int top)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::V4LCam::setTop( unsigned int top)
+{
+  return false;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::width() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::V4LCam::width() const
+{
+  return p_currentMode.width;
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::setWidth( unsigned int width)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::V4LCam::setWidth( unsigned int width)
+{
+  return false;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::maxWidth() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::V4LCam::maxWidth() const
+{
+  return p_currentMode.width;
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::height() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::V4LCam::height() const
+{
+  return p_currentMode.height;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::setHeight( unsigned int height)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::V4LCam::setHeight( unsigned int height)
+{
+  return false;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::maxHeight() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::V4LCam::maxHeight() const
+{
+  return p_currentMode.height;
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::availableModes() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::vector<std::string>
+liblmbcam::V4LCam::availableModes() const
+{
+  std::vector<std::string> ret;
+  transform( p_modes.begin(), p_modes.end(),
+             std::back_inserter( ret), GetKey());
+  return ret;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::vector<double>
+liblmbcam::V4LCam::availableFramerates() const
+{
+  return availableFrameratesInMode( mode());
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+std::string
+liblmbcam::V4LCam::colorCoding() const
+{
+  for( std::map<std::string,ColorCoding>::const_iterator it =
+           p_colorCodings.begin(); it != p_colorCodings.end(); ++it)
+  {
+    if( p_currentMode.colorCodingID  == it->second.id)
+        return it->first;
+  }
+  
+  return "";
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::cleanup()
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::V4LCam::cleanup()
+{
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:setRingBufferSize( unsigned int nFrames)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::V4LCam::setRingBufferSize( unsigned int nFrames)
+{
+  if( !p_cameraIsRunning)
+  {
+    p_numBufferedFrames = nFrames;
+    
+  }
+  else
+  {
+    V4LCamError error( "unable to set ringbuffer size: camera is running");
+    LMBErrorHandler::ErrorHandler()->handle( error);
+  }
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::mostRecentFrameIndex()
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+long
+liblmbcam::V4LCam::mostRecentFrameIndex()
+{
+  if( p_cameraIsRunning)
+  {
+    if( p_grabberStatus == ERROR)
+    {
+      stopCamera();
+      return -1;
+    }
+    else
+        return p_writtenFrameCount - (long) 1;
+  }
+  else
+  {
+    return -1;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::mostRecentFrameIndex()
+ *  ==> see headerfile
+ *=======================================================================*/
+inline int liblmbcam::V4LCam::mostRecentRingBufferIndex()
+{ 
+  return mostRecentFrameIndex() % p_numBufferedFrames;
+}
+
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::waitForFrameStarted( long frameIndex)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+long
+liblmbcam::V4LCam::waitForFrameStarted( long frameIndex)
+{
+  if( frameIndex < 0)
+  {
+    return -1;
+  }
+  else
+  {
+    MutexLocker locker( &p_frameStartMutex);
+    while( p_writtenFrameCount < frameIndex)
+    {
+      pthread_cond_wait( &p_frameStartCond,
+                         &p_frameStartMutex);
+      if( p_grabberStatus == ERROR)
+      {
+        stopCamera();
+        return -1;
+      }
+      p_readFrameCount = p_writtenFrameCount - (long) 1;
+    }
+    return frameIndex;
+  }
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::waitForFrameFinished( long frameIndex)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+long
+liblmbcam::V4LCam::waitForFrameFinished( long frameIndex)
+{
+	
+  if( frameIndex < 0)
+  {
+    return -1;
+  }
+  else
+  {
+    MutexLocker locker( &p_frameFinishMutex);
+    while( p_writtenFrameCount - (long) 1 < frameIndex)
+    {
+      pthread_cond_wait( &p_frameFinishCond,
+                         &p_frameFinishMutex);
+      if( p_grabberStatus == ERROR)
+      {
+        stopCamera();
+        return -1;
+      }
+      p_readFrameCount = p_writtenFrameCount;
+    }
+
+    return frameIndex;
+  }
+}
+  
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::tryLockFrame( long frameIndex)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::V4LCam::tryLockFrame( long frameIndex)
+{
+  if( p_grabberStatus == ERROR)
+  {
+    stopCamera();
+    return false;
+  }
+
+  bool ret = false;
+  
+  if( frameIndex >= 0)
+  {
+    if( p_lockedFrame < 0)
+    {
+      if( frameIndex < p_writtenFrameCount)
+      {
+        if( p_writtenFrameCount - (long) p_numBufferedFrames < frameIndex)
+        {
+          p_lockedFrame = frameIndex;
+          ret = true;
+        }
+        else
+        {
+          V4LCamError error;
+          error << "Frame " << frameIndex << " is no longer available";
+          LMBErrorHandler::ErrorHandler()->handle( error);
+        }
+      }
+      else
+      {
+        V4LCamError error;
+        error << "Frame " << frameIndex << " is not yet available";
+        LMBErrorHandler::ErrorHandler()->handle( error);
+      }
+    }
+    else
+    {
+      V4LCamError error;
+      error << "Frame " << p_lockedFrame << " is already locked";
+      LMBErrorHandler::ErrorHandler()->handle( error);
+    }
+  }
+  
+  return ret;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::getFrame( long frameIndex)
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned char*
+liblmbcam::V4LCam::getFrame( long frameIndex)
+{
+  if( p_grabberStatus == ERROR)
+  {
+    stopCamera();
+    return 0;
+  }
+
+  if( p_writtenFrameCount == 0
+      || frameIndex < 0
+      || frameIndex < p_writtenFrameCount - (long) p_numBufferedFrames
+      || frameIndex > p_writtenFrameCount)
+  {
+    return 0;
+  }
+  else
+  {
+    return _vBufFrameStart[frameIndex%p_numBufferedFrames];
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::unlockFrame()
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+void
+liblmbcam::V4LCam::unlockFrame()
+{
+  if( p_grabberStatus == ERROR)
+  {
+    stopCamera();
+  }
+  
+  if( p_lockedFrame < 0)
+  {
+    V4LCamError error( "No frame locked");
+    LMBErrorHandler::ErrorHandler()->handle( error);
+  }
+  else
+  {
+    p_readFrameCount = p_lockedFrame;
+    p_lockedFrame = -1;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::isCompressed() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+bool
+liblmbcam::V4LCam::isCompressed() const
+{
+  if( nComponents() != 0)
+  {
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::nComponents() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+unsigned int
+liblmbcam::V4LCam::nComponents() const
+{
+  return p_currentMode.nComponents;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:V4LCam::bytePerPixel() const
+ *  ==> see headerfile
+ *=======================================================================*/
+inline
+double
+liblmbcam::V4LCam::bytePerPixel() const
+{
+  return p_currentMode.bytePerPixel;
+}

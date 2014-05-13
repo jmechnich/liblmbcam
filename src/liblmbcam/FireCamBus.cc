@@ -1,67 +1,20 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: FireCamBus.cc,v $
-**   $Revision: 1.13 $$Name:  $
-**       $Date: 2004/01/26 21:33:41 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: FireCamBus.cc,v $
-**  Revision 1.13  2004/01/26 21:33:41  mechnich
-**  added FireCamBus::available() function
-**
-**  Revision 1.12  2003/10/01 13:32:34  pigorsch
-**  - register/unregister bus in constructor/destructor
-**
-**  Revision 1.11  2003/08/05 14:40:34  mechnich
-**  call dc1394_destroy_handle() instead of raw1394_destroy_handle()
-**
-**  Revision 1.10  2003/07/03 15:25:17  mechnich
-**  - added comments
-**  - improved Format7 capabilities
-**  - added boolean return values to set...() functions
-**
-**  Revision 1.9  2003/06/12 16:13:19  mechnich
-**  added comments
-**
-**  Revision 1.8  2003/05/09 14:22:00  ronneber
-**  - releases bus correctly when exception in constructor occurs
-**  - corrected typo in error message
-**
-**  Revision 1.7  2003/05/07 16:14:31  ronneber
-**  - extended error message for Constructor
-**
-**  Revision 1.6  2003/05/07 00:06:29  mechnich
-**  intorduced a wrapper mutex for critical libraw1394 functions,
-**  liblmbcam should now be completely thread safe
-**
-**  Revision 1.5  2003/04/23 13:57:31  mechnich
-**  removed deprecated includes
-**
-**  Revision 1.4  2003/04/23 13:28:52  mechnich
-**  - fixed parameter queries for all tested cameras
-**  - fixed bug in iso handler function
-**  - moved p_cameraIsRunning with affiliated functions to LMBCam
-**
-**  Revision 1.3  2003/01/03 16:23:12  mechnich
-**  corrected minor bugs
-**
-**  Revision 1.2  2002/12/10 02:42:06  mechnich
-**  added dma related functions in LMBCam
-**  fixed bugs with PYRO WEBCAM API-200
-**
-**  Revision 1.1  2002/12/04 13:17:46  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "FireCamBus.hh"
+
 #include "FireCamBusRegistry.hh"
 
 /*=========================================================================
@@ -226,5 +179,25 @@ liblmbcam::FireCamBus::available()
   {
   }
   return ret;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
+liblmbcam::LMBCam*
+liblmbcam::FireCamBus::cameraByIndex( unsigned int index) const
+{
+  if( index >= p_cameras.size())
+  {
+    std::stringstream errString;
+    errString << "no camera with index " << index << " attached to bus "
+              << p_busIndex;
+
+    FireCamBusError error( errString.str());
+    LMBErrorHandler::ErrorHandler()->handle( error);
+  }
+  
+  return p_cameras[index];
 }
 

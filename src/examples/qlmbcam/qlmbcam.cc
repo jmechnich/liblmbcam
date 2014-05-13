@@ -1,34 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: qlmbcam.cc,v $
-**   $Revision: 1.5 $$Name:  $
-**       $Date: 2005/02/28 00:22:17 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: qlmbcam.cc,v $
-**  Revision 1.5  2005/02/28 00:22:17  mechnich
-**  changed include path for libcmdline headers
-**
-**  Revision 1.4  2004/10/19 05:51:14  mechnich
-**  changed LMBError interface; lock certain camera controls (like DMA) while camera is running
-**
-**  Revision 1.3  2004/03/18 15:40:12  mechnich
-**  *** empty log message ***
-**
-**  Revision 1.2  2004/01/26 21:37:34  mechnich
-**  eat libdc1394 output
-**
-**  Revision 1.1  2003/10/05 19:30:34  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 
@@ -47,10 +30,7 @@ using namespace liblmbcam;
 
 int main( int argc, char** argv)
 {
-  freopen( "/dev/null", "w+", stdout);
-
   CmdLine cmd( argv[0], "", true, NULL);
-
   cmd.description( "qlmbcam - a common interface to all liblmbcam bus"
                    " and camera classes using the libqlmbcam GUI library");
 
@@ -63,6 +43,8 @@ int main( int argc, char** argv)
      *---------------------------------------------------------------------*/
     ArgvIter arg_iter( --argc, ++argv);
     cmd.parse( arg_iter);
+
+    //freopen( "/dev/null", "w+", stdout);
 
     /*---------------------------------------------------------------------
      *  Setup GUI

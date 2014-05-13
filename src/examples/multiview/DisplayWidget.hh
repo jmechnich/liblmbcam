@@ -1,32 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: DisplayWidget.hh,v $
-**   $Revision: 1.4 $$Name:  $
-**       $Date: 2005/02/28 00:18:57 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: DisplayWidget.hh,v $
-**  Revision 1.4  2005/02/28 00:18:57  mechnich
-**  changed include path for libfidwid headers
-**
-**  Revision 1.3  2004/02/06 13:41:04  mechnich
-**  changed include paths
-**
-**  Revision 1.2  2004/01/27 03:59:04  mechnich
-**  corrected install path
-**
-**  Revision 1.1  2003/10/01 13:40:43  pigorsch
-**  - initial revision
-**
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef DISPLAYWIDGET_HH
 #define DISPLAYWIDGET_HH
@@ -90,12 +75,15 @@ private:
   unsigned char* p_data;
   
   static YUV411_RGBConverter YUV411Conv;
-  static YUV422_RGBConverter YUV422Conv;
+  static UYVY_RGBConverter   UYVYConv;
+  static YUYV_RGBConverter   YUYVConv;
+  static VYUY_RGBConverter   VYUYConv;
+  static YVYU_RGBConverter   YVYUConv;
   static YUV444_RGBConverter YUV444Conv;
-  static MONO_RGBConverter MONOConv;
+  static MONO_RGBConverter   MONOConv;
   static MONO16_RGBConverter MONO16Conv;
-  static RGB_RGBConverter RGBConv;
-  static RGB16_RGBConverter RGB16Conv;
+  static RGB_RGBConverter    RGBConv;
+  static RGB16_RGBConverter  RGB16Conv;
   
 };
 

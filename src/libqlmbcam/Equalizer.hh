@@ -1,28 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: Equalizer.hh,v $
-**   $Revision: 1.3 $$Name:  $
-**       $Date: 2003/10/23 14:50:33 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: Equalizer.hh,v $
-**  Revision 1.3  2003/10/23 14:50:33  mechnich
-**   fixed error in Equalizer
-**
-**  Revision 1.2  2003/10/21 17:14:51  mechnich
-**  finished equalizer function
-**
-**  Revision 1.1  2003/10/17 22:49:56  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef EQUALIZER_HH
 #define EQUALIZER_HH

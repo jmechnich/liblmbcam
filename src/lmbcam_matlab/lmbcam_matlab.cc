@@ -1,28 +1,17 @@
-/**************************************************************************
-**       Title: matlab interface for liblmbcam
-**    $RCSfile: lmbcam_matlab.cc,v $
-**   $Revision: 1.3 $$Name:  $
-**       $Date: 2004/10/19 05:47:50 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: lmbcam_matlab.cc,v $
-**  Revision 1.3  2004/10/19 05:47:50  mechnich
-**  changed LMBError interface
-**
-**  Revision 1.2  2004/03/22 15:48:11  ronneber
-**  - debugging messages
-**
-**  Revision 1.1  2003/05/13 09:33:56  ronneber
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <cstdlib>
 #include <cstdio>

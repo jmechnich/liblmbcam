@@ -1,28 +1,17 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: QlmbCamParamControl.hh,v $
-**   $Revision: 1.3 $$Name:  $
-**       $Date: 2003/05/22 08:53:44 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: QlmbCamParamControl.hh,v $
-**  Revision 1.3  2003/05/22 08:53:44  mechnich
-**  added comments and made short functions inline
-**
-**  Revision 1.2  2003/05/22 08:27:08  mechnich
-**  added signal-and-slot mechanism for controlling the cameras parameters
-**
-**  Revision 1.1  2003/05/21 08:58:39  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef QLMBCAMPARAMCONTROL_HH
 #define QLMBCAMPARAMCONTROL_HH

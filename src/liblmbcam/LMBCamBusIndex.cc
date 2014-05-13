@@ -1,33 +1,26 @@
-/**************************************************************************
-**       Title: 
-**    $RCSfile: LMBCamBusIndex.cc,v $
-**   $Revision: 1.3 $$Name:  $
-**       $Date: 2004/06/29 16:27:53 $
-**   Copyright: GPL $Author: mechnich $
-** Description:
-**
-**    
-**
-**-------------------------------------------------------------------------
-**
-**  $Log: LMBCamBusIndex.cc,v $
-**  Revision 1.3  2004/06/29 16:27:53  mechnich
-**  added getFirstCamera()
-**
-**  Revision 1.2  2004/06/06 17:03:21  mechnich
-**  *** empty log message ***
-**
-**  Revision 1.1  2004/05/30 20:54:20  mechnich
-**  initial revision
-**
-**
-**
-**************************************************************************/
+// This file is part of liblmbcam.
+//
+// liblmbcam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// liblmbcam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with liblmbcam.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "LMBCamBusIndex.hh"
 
 #ifdef HAVE_LIBDC1394
 #include "FireCamBus.hh"
+#endif
+
+#ifdef HAVE_V4L2
+#include "V4LCamBus.hh"
 #endif
 
 /*=========================================================================
@@ -53,6 +46,13 @@ liblmbcam::LMBCamBusIndex::LMBCamBusIndex( BusType type)
       oss << "FireCamBus_" << i;
       _busses[oss.str()] = new FireCamBus( i);
     }
+#endif
+  }
+
+  if( _type & V4LCam)
+  {
+#ifdef HAVE_V4L2
+    _busses["V4LCamBus"] = new V4LCamBus;
 #endif
   }
 }
