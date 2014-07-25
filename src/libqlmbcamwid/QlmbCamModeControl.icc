@@ -77,7 +77,7 @@ QlmbCamModeControlWidget::updateFormat7Geometry()
         
     p_camera->startCameraRunContinuous();
   }
-  catch( LMBCamError& error)
+  catch( LMBCamError&)
   {
     QString error( "Format7 geometry error: ");
     if( p_left->text().toInt() + p_width->text().toInt() >
